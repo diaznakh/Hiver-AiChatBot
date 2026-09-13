@@ -1,0 +1,14 @@
+{
+  "version": "amazon-train-derived-v1",
+  "status": "Derived from AmazonHelp training-partition term audit; definitions require human annotation review",
+  "intents": {
+    "delivery_tracking": "Late, missing, marked-delivered, courier, shipment, arrival, or tracking issue.",
+    "return_refund": "Return initiation, returned item, refund request, or refund-status issue.",
+    "order_change": "Order status, cancellation, pre-order, or requested order detail change.",
+    "payment_charge": "Payment failure, unexpected charge, billing, card, or gift-card issue.",
+    "account_prime": "Amazon account access, password, Prime membership, or subscription issue.",
+    "digital_service": "Kindle, Audible, Prime Video, Fire TV, Alexa, Echo, application, download, or streaming issue.",
+    "product_issue": "Damaged, defective, broken, wrong, missing, or non-working physical product.",
+    "other_unclear": "No supported primary intent can be assigned confidently, including unsupported-language or insufficient-context messages."
+  }
+}

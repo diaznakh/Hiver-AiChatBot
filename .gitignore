@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+*.sqlite3
+.venv/
+.env
+data/processed/
+data/raw/
+artifacts/dataset.sqlite3*

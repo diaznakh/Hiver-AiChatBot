@@ -1,0 +1,12 @@
+{
+  "mode": "diagnostic",
+  "input": "data/sample/real_weak_diagnostic.jsonl",
+  "split": "all",
+  "systems": [
+    "b0",
+    "b1",
+    "b2"
+  ],
+  "examples": 100,
+  "warning": "Real tweets with heuristic weak labels; diagnostic results are not assignment results."
+}

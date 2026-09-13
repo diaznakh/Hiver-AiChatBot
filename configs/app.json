@@ -1,0 +1,19 @@
+{
+  "mode": "offline_demo",
+  "brand_id": "AmazonHelp",
+  "index_path": "data/indexes/support_cases.jsonl",
+  "classifier_path": "data/indexes/intent_model.json",
+  "policy": {
+    "auto_delivery_enabled": false,
+    "tau_intent": 0.55,
+    "tau_evidence": 0.2,
+    "threshold_status": "WEAK_DIAGNOSTIC_ONLY_NOT_HUMAN_CALIBRATED"
+  },
+  "limits": {
+    "total_deadline_ms": 15000,
+    "max_generation_attempts": 2,
+    "max_input_tokens_total": 8000,
+    "max_output_tokens_total": 900,
+    "max_evidence_cases": 5
+  }
+}

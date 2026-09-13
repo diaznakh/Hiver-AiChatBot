@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hiver-support-agent"
+version = "0.1.0"
+description = "Evidence-grounded, single-brand support agent for the Hiver SDE take-home"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.6"]
+
+[project.scripts]
+support-agent = "support_agent.cli:main"
+
+[tool.setuptools]
+packages = ["support_agent", "pipeline", "evals"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100

@@ -1,0 +1,39 @@
+{
+  "brand_id": "AmazonHelp",
+  "brand_replies": 169840,
+  "unique_parent_ids": 155445,
+  "available_parent_rows": 154985,
+  "direct_customer_brand_pairs": 154976,
+  "incomplete_ancestry_pairs": 16380,
+  "conversation_groups": 86643,
+  "exact_duplicate_messages_removed": 3691,
+  "source_file": "twcs.csv",
+  "source_size_bytes": 516508641,
+  "source_sha256": "cd297fcfa1bf6f99938be242e8e578980bc6d1b96adc8691abec9a39175b03c0",
+  "split_method": "chronological 70/15/15 by conversation root, then global exact-text deduplication",
+  "eligible_by_split": {
+    "train": 107099,
+    "dev": 22150,
+    "test": 22036
+  },
+  "selected_training_evidence": 5600,
+  "training_intent_counts": {
+    "digital_service": 700,
+    "delivery_tracking": 700,
+    "other_unclear": 700,
+    "payment_charge": 700,
+    "order_change": 700,
+    "product_issue": 700,
+    "account_prime": 700,
+    "return_refund": 700
+  },
+  "golden_set": {
+    "total": 200,
+    "dev": 50,
+    "test": 150,
+    "reviewed": false
+  },
+  "diagnostic_examples": 100,
+  "status": "REAL_DATA_WITH_WEAK_TRAIN_LABELS_AND_UNREVIEWED_GOLDEN_LABELS",
+  "seed": 20260912
+}

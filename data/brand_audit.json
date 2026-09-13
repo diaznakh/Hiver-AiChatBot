@@ -1,0 +1,16 @@
+{
+  "source": "Customer Support on Twitter (twcs.csv)",
+  "method": "Single streaming pass over outbound rows; DM, URL, and actionable rates are lexical audit signals, not quality labels.",
+  "dataset_records": 2811774,
+  "candidates": [
+    {"brand": "AmazonHelp", "outbound_replies": 169840, "dm_rate": 0.006, "actionable_signal_rate": 0.236, "url_rate": 0.413},
+    {"brand": "AppleSupport", "outbound_replies": 106860, "dm_rate": 0.525, "actionable_signal_rate": 0.553, "url_rate": 0.754},
+    {"brand": "Uber_Support", "outbound_replies": 56270, "dm_rate": 0.352, "actionable_signal_rate": 0.620, "url_rate": 0.513},
+    {"brand": "SpotifyCares", "outbound_replies": 43265, "dm_rate": 0.308, "actionable_signal_rate": 0.360, "url_rate": 0.505},
+    {"brand": "Delta", "outbound_replies": 42253, "dm_rate": 0.164, "actionable_signal_rate": 0.168, "url_rate": 0.153},
+    {"brand": "Tesco", "outbound_replies": 38573, "dm_rate": 0.268, "actionable_signal_rate": 0.145, "url_rate": 0.083},
+    {"brand": "AmericanAir", "outbound_replies": 36764, "dm_rate": 0.168, "actionable_signal_rate": 0.216, "url_rate": 0.065}
+  ],
+  "selected_brand": "AmazonHelp",
+  "selection_reason": "Largest coherent corpus, sufficient intent diversity, low explicit DM-only rate, and enough complete customer-parent rows for leakage-safe splits."
+}

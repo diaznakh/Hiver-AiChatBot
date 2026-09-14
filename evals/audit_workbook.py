@@ -1,5 +1,6 @@
 """Audit the workbook against the original source rows without changing labels."""
 import csv
+from decimal import Decimal, InvalidOperation
 import hashlib
 import json
 from collections import Counter
@@ -18,10 +19,25 @@ def main():
     if {row["example_id"] for row in raw} != set(by_id):
         raise ValueError("Example IDs differ from the source set")
     immutable = ("conversation_id", "message", "split", "target_tweet_id", "history_tweet_ids")
+    differences = Counter()
     for row in raw:
         for field in immutable:
             if row[field] != by_id[row["example_id"]][field]:
-                raise ValueError(f"Source field changed: {row['example_id']} {field}")
+                actual, expected = row[field], by_id[row["example_id"]][field]
+                kind = "different_value"
+                if actual.strip() == expected.strip():
+                    kind = "whitespace_only"
+                else:
+                    try:
+                        if Decimal(actual) == Decimal(expected):
+                            kind = "numeric_format_only"
+                    except InvalidOperation:
+                        pass
+                differences[f"{field}:{kind}"] += 1
+    print("SOURCE_CHANGE_COUNTS_JSON=" + json.dumps(dict(differences)), flush=True)
+    print("REVIEW_FLAG_COUNTS_JSON=" + json.dumps(dict(Counter(row.get("human_reviewed", "") for row in raw))), flush=True)
+    if differences:
+        raise ValueError("Source fields differ; see aggregate SOURCE_CHANGE_COUNTS_JSON")
     dev = load_examples(source, "dev")
     test = load_examples(source, "test")
     if len(dev) != 50 or len(test) != 150:

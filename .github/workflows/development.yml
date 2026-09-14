@@ -6,6 +6,7 @@ on:
       - 'data/golden_set.xlsx'
       - '.github/workflows/development.yml'
       - 'evals/audit_workbook.py'
+      - 'evals/run.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -18,6 +19,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: Remove results from previous runs
+        run: python3 -c 'import shutil; shutil.rmtree("artifacts/development", ignore_errors=True)'
       - name: Validate uploaded workbook
         run: python3 -m evals.audit_workbook
       - name: Evaluate reviewed development split

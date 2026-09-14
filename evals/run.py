@@ -29,10 +29,26 @@ def _xlsx_rows(path: Path, sheet_name: str = "Golden Set") -> list[dict[str, str
     office_rel = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
     with zipfile.ZipFile(path) as archive:
         workbook = ElementTree.fromstring(archive.read("xl/workbook.xml"))
-        sheet = next(
-            node for node in workbook.findall(f"{{{main_ns}}}sheets/{{{main_ns}}}sheet")
-            if node.attrib["name"] == sheet_name
-        )
+        sheets = workbook.findall(f"{{{main_ns}}}sheets/{{{main_ns}}}sheet")
+        sheet = next((node for node in sheets if node.attrib["name"] == sheet_name), None)
+        if sheet is None:
+            required = {"example_id", "conversation_id", "message", "split",
+                        "correct_intent", "correct_route", "good_reply_should_mention",
+                        "reply_must_not_claim", "reviewer_name", "human_reviewed"}
+            candidates = []
+            headers = {}
+            for node in sheets:
+                name = node.attrib["name"]
+                rows = _xlsx_rows(path, name)
+                headers[name] = list(rows[0]) if rows else []
+                if rows and required <= set(rows[0]):
+                    candidates.append((name, rows))
+            if len(candidates) != 1:
+                raise ValueError(
+                    f"Expected one data worksheet with golden-set columns; found {len(candidates)}. "
+                    f"Available worksheets and headers: {headers}"
+                )
+            return candidates[0][1]
         relation_id = sheet.attrib[f"{{{office_rel}}}id"]
         relations = ElementTree.fromstring(archive.read("xl/_rels/workbook.xml.rels"))
         target = next(
@@ -63,6 +79,8 @@ def _xlsx_rows(path: Path, sheet_name: str = "Golden Set") -> list[dict[str, str
                     value = "" if inline is None else "".join(inline.itertext())
                 values[column - 1] = value
             matrix.append(values)
+    if not matrix or not matrix[0]:
+        return []
     headers = [matrix[0].get(index, "") for index in range(max(matrix[0]) + 1)]
     return [
         {header: row.get(index, "") for index, header in enumerate(headers) if header}

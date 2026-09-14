@@ -1,0 +1,36 @@
+name: Development evaluation
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/golden_set.xlsx'
+      - '.github/workflows/development.yml'
+      - 'evals/audit_workbook.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  development:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate uploaded workbook
+        run: python3 -m evals.audit_workbook
+      - name: Evaluate reviewed development split
+        run: bash scripts/develop.sh
+      - name: Record machine-readable summaries
+        run: |
+          python3 -c 'import json,pathlib; print("DEVELOPMENT_SUMMARIES_JSON=" + json.dumps({p.name:json.loads(p.read_text()) for p in pathlib.Path("artifacts/development").glob("*.json")}))'
+      - name: Save predictions, metrics, calibration and workbook export
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: development-evaluation
+          path: |
+            artifacts/development/
+            configs/app.json
+          retention-days: 90

@@ -1,0 +1,38 @@
+name: Held-out evaluation
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/official.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evaluation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate workbook and run frozen implementation
+        run: |
+          python3 -m evals.audit_workbook
+          bash scripts/evaluate.sh
+      - name: Prepare blinded human reply ratings
+        run: |
+          python3 -m evals.make_human_rating_sheet --examples data/golden_set.xlsx --predictions artifacts/official/predictions_b0.jsonl artifacts/official/predictions_b1.jsonl artifacts/official/predictions_b2.jsonl --output artifacts/ratings/human_ratings.csv
+      - name: Record aggregate results
+        run: |
+          python3 -c 'import json,pathlib; print("OFFICIAL_SUMMARIES_JSON=" + json.dumps({p.name:json.loads(p.read_text()) for p in pathlib.Path("artifacts/official").glob("*.json")}))'
+      - name: Save evaluation package
+        uses: actions/upload-artifact@v4
+        with:
+          name: held-out-evaluation-and-human-ratings
+          path: |
+            artifacts/official/
+            artifacts/ratings/human_ratings.csv
+            evals/human_rating_guide.md
+            configs/app.json
+          retention-days: 90

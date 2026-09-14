@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+from decimal import Decimal, InvalidOperation
 import hashlib
 import os
 import json
@@ -21,6 +22,20 @@ from .metrics import compute
 
 def _items(value: str) -> list[str]:
     return [item.strip() for item in value.split("|") if item.strip()]
+
+
+def normalize_source_id(value: str) -> str:
+    # Excel may serialize integral IDs as decimals or scientific notation.
+    # Preserve nonnumeric IDs and non-integral values for the source audit.
+    if len(value) > 80 or not re.fullmatch(r"[0-9]+(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?", value):
+        return value
+    try:
+        number = Decimal(value)
+        if number.is_finite() and number == number.to_integral_value() and number.adjusted() < 80:
+            return str(int(number))
+    except InvalidOperation:
+        pass
+    return value
 
 
 def _xlsx_rows(path: Path, sheet_name: str = "Golden Set") -> list[dict[str, str]]:
@@ -82,11 +97,16 @@ def _xlsx_rows(path: Path, sheet_name: str = "Golden Set") -> list[dict[str, str
     if not matrix or not matrix[0]:
         return []
     headers = [matrix[0].get(index, "") for index in range(max(matrix[0]) + 1)]
-    return [
+    rows = [
         {header: row.get(index, "") for index, header in enumerate(headers) if header}
         for row in matrix[1:]
         if row
     ]
+    for row in rows:
+        for field in ("conversation_id", "target_tweet_id"):
+            if field in row:
+                row[field] = normalize_source_id(row[field])
+    return rows
 
 
 def load_examples(path: str | Path, split: str = "all") -> list[dict]:

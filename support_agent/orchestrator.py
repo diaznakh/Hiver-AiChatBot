@@ -15,7 +15,7 @@ class SupportOrchestrator:
         self.model = model or DeterministicDraftGateway()
 
     def handoff(self, intent, codes, *, degraded=False, evidence=()) -> AgentResult:
-        draft = "I’m sorry you’re dealing with this. A support specialist will review your request."
+        draft = "I’m sorry you’re dealing with this. Human support needs to review your request. I cannot check account details or perform account actions."
         return AgentResult(
             intent=intent.label,
             intent_confidence=intent.confidence,

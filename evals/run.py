@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
+import os
 import json
 import re
 import time
@@ -104,40 +106,55 @@ def load_examples(path: str | Path, split: str = "all") -> list[dict]:
     return [row for row in examples if split == "all" or row.get("split") == split]
 
 
+
+INTENTS = {"account_prime", "delivery_tracking", "digital_service", "order_change",
+           "other_unclear", "payment_charge", "product_issue", "return_refund"}
+
+
+def validate_reviewed_examples(examples: list[dict]) -> None:
+    if not examples:
+        raise ValueError("no reviewed examples found")
+    for row in examples:
+        labels = row.get("labels", {})
+        annotation = row.get("annotation", {})
+        if (labels.get("primary_intent") not in INTENTS
+                or labels.get("expected_route") not in {"AUTO_HANDLE", "ESCALATE"}
+                or not labels.get("acceptable_points")
+                or "forbidden_claims" not in labels
+                or not annotation.get("annotator_id")
+                or annotation.get("reviewed") is not True):
+            raise ValueError("examples require valid labels, reply points, reviewer name and human review")
+        if row.get("metadata", {}).get("synthetic") or row.get("metadata", {}).get("weak_labels"):
+            raise ValueError("reviewed evaluation cannot use synthetic or weak-labelled examples")
+    for field in ("example_id", "conversation_id"):
+        values = [row.get(field) for row in examples]
+        if any(not value for value in values) or len(values) != len(set(values)):
+            raise ValueError(f"examples require distinct nonempty {field} values")
+
+
+def validate_evaluation(examples: list[dict], mode: str, split: str) -> None:
+    if mode == "diagnostic":
+        if not examples:
+            raise ValueError("no examples found")
+        return
+    expected_split = "dev" if mode == "development" else "test"
+    if split != expected_split or any(row.get("split") != expected_split for row in examples):
+        raise ValueError(f"{mode} mode requires only the {expected_split} split")
+    validate_reviewed_examples(examples)
+    if mode == "official" and not 150 <= len(examples) <= 250:
+        raise ValueError("official mode requires 150-250 reviewed test examples")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run B0/B1/B2 on an identical labelled split")
     parser.add_argument("--input", default="data/sample/real_weak_diagnostic.jsonl")
     parser.add_argument("--output", default="artifacts/latest")
     parser.add_argument("--systems", default="b0,b1,b2")
-    parser.add_argument("--mode", choices=["diagnostic", "official"], default="diagnostic")
+    parser.add_argument("--mode", choices=["diagnostic", "development", "official"], default="diagnostic")
     parser.add_argument("--split", choices=["all", "dev", "test"], default="all")
     args = parser.parse_args()
     examples = load_examples(args.input, args.split)
-    if args.mode == "official":
-        if not 150 <= len(examples) <= 250 or any(
-            row.get("metadata", {}).get("synthetic") or row.get("metadata", {}).get("weak_labels")
-            for row in examples
-        ):
-            raise ValueError("official mode requires 150-250 non-synthetic, human-labelled examples")
-        required = {"primary_intent", "expected_route", "acceptable_points", "forbidden_claims"}
-        if any(not required <= set(row.get("labels", {})) for row in examples):
-            raise ValueError("official examples have incomplete labels")
-        if any(
-            row["labels"].get("primary_intent") is None
-            or row["labels"].get("expected_route") is None
-            or not row["labels"].get("acceptable_points")
-            or not row.get("annotation", {}).get("annotator_id")
-            or not row.get("annotation", {}).get("reviewed", False)
-            for row in examples
-        ):
-            raise ValueError("official examples must be reviewed by a human")
-        intents = {"account_prime", "delivery_tracking", "digital_service", "order_change",
-                   "other_unclear", "payment_charge", "product_issue", "return_refund"}
-        if any(row["labels"]["primary_intent"] not in intents or row["labels"]["expected_route"] not in {"AUTO_HANDLE", "ESCALATE"} for row in examples):
-            raise ValueError("invalid golden intent or route; use the documented taxonomy")
-        groups = [row.get("conversation_id") for row in examples]
-        if None in groups or len(groups) != len(set(groups)):
-            raise ValueError("official examples must use distinct conversation groups")
+    validate_evaluation(examples, args.mode, args.split)
     out = Path(args.output)
     out.mkdir(parents=True, exist_ok=True)
     classifier = NaiveBayesIntentClassifier.load("data/indexes/intent_model.json")
@@ -163,10 +180,17 @@ def main() -> None:
     manifest = {
         "mode": args.mode,
         "input": args.input,
+        "input_sha256": hashlib.sha256(Path(args.input).read_bytes()).hexdigest(),
+        "config_sha256": hashlib.sha256(Path("configs/app.json").read_bytes()).hexdigest(),
+        "gateway": os.getenv("SUPPORT_AGENT_GATEWAY", "offline"),
         "split": args.split,
         "systems": list(all_metrics),
         "examples": len(examples),
-        "warning": "Real tweets with heuristic weak labels; diagnostic results are not assignment results." if args.mode == "diagnostic" else None,
+        "warning": {
+            "diagnostic": "Diagnostic results are not assignment results; labels may be heuristic.",
+            "development": "Reviewed development data used for tuning; not held-out test results. See data/ANNOTATION_STATUS.md.",
+            "official": None,
+        }[args.mode],
     }
     (out / "metrics.json").write_text(json.dumps(all_metrics, indent=2) + "\n")
     (out / "run_manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")

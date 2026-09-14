@@ -8,7 +8,7 @@ For each incoming customer message, the agent returns exactly the three things r
 2. A reply draft grounded in similar historical AmazonHelp conversations.
 3. An `AUTO_HANDLE` or `ESCALATE` decision with a reason.
 
-The project includes a 200-example golden-set candidate workbook (human labels still required), two baselines, automated metrics, a blinded LLM-as-judge workflow, a report draft, and a 15-item decision log. It does not send tweets or perform account actions.
+The project includes a 200-example golden-set candidate workbook (see annotation status below), two baselines, automated metrics, a blinded LLM-as-judge workflow, a report draft, and a 15-item decision log. It does not send tweets or perform account actions.
 
 ## Dataset and brand choice
 
@@ -73,6 +73,24 @@ Open it in Excel, Numbers, or LibreOffice. The `Method` tab explains the labels.
 The workbook contains 50 development examples and 150 locked test examples. Each split randomly samples 70% from the non-challenge pool and 30% from the challenge pool; this is NOT a 70% natural-traffic sample. Conversations were split chronologically by conversation root before sampling, and exact duplicates were removed across partitions.
 
 Machine-generated labels are not presented as human ground truth. Official evaluation stops if any required test label is blank or not marked `YES`.
+
+## Reviewed development evaluation
+
+Zaid completed the 50 development rows in the revised upload. Import of that
+workbook into this repository is pending; see [annotation status](data/ANNOTATION_STATUS.md).
+The 150 test rows and blinded reply ratings remain pending.
+
+After placing the revised workbook at `data/golden_set.xlsx`, run:
+
+```bash
+bash scripts/develop.sh
+```
+
+This runs tests, calibrates only on development rows, and saves B0/B1/B2 development
+predictions and metrics in `artifacts/development/`. Input and configuration
+hashes identify the evaluated versions. Development scores are not headline
+test results. A calibration with no useful automatic replies disables automatic
+handling and records `NO_USEFUL_AUTO_THRESHOLD_FOUND`; it does not establish safety.
 
 ## Reproduce the headline evaluation
 
@@ -142,9 +160,9 @@ Agreement is reported with weighted kappa for groundedness, relevance, helpfulne
 
 ## Current status
 
-The prototype, real-data subset, baseline implementations, evaluation workflows, shared anchored judge rubric, and report generator are implemented. Automated tests pass. This is not yet a completed evaluation or submission.
+The prototype, real-data subset, baseline implementations, evaluation workflows, shared anchored judge rubric, and report generator are implemented. The offline test workflow checks each code update; consult its result for the current commit. This is not yet a completed evaluation or submission.
 
-The final headline numbers and judge-human agreement cannot honestly be filled in until Zaid Khan personally reviews the golden set and rates the blinded reply sample. The repository deliberately refuses to label machine suggestions as human work.
+Final headline numbers require the completed held-out test labels. Judge-human agreement additionally requires the blinded reply ratings and a configured judge run. The 50 development rows do not need to be repeated.
 
 ## Repository structure
 

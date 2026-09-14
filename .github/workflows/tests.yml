@@ -1,0 +1,20 @@
+name: Offline tests
+on:
+  push:
+    branches: [main, completion/development-evaluation]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile and run offline tests
+        run: |
+          python3 -m compileall -q support_agent pipeline evals tests
+          python3 -m unittest discover -s tests -v

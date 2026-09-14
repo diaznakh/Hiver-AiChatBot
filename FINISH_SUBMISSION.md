@@ -1,41 +1,48 @@
 # Finish the submission
 
-## What changed after the audit
+## Completed development review
 
-- Offline replies now depend on supported actions in the retrieved response AND the customer topic. No supported action means an honest handoff, not a falsely grounded fixed template.
-- This is a deliberately narrow, evidence-conditioned rule system, not an LLM generator. Retrieval and action-pattern matches can still be wrong. Current policy and account status remain unavailable.
-- B0 is explicitly a constant-intent baseline, not an alleged majority estimator. Macro-F1 uses all eight labels consistently across systems; unsupported test classes score zero.
-- Human and LLM raters receive the same fully anchored 1–5 rubric and the same acceptable/forbidden answer points.
-- Rating validation rejects blanks, invalid booleans, duplicate IDs, and partial human/judge overlap. Agreement includes kappa, raw agreement, MAE, and per-system human/judge quality summaries.
-- Report generation groups observed failures and includes human-rated reply failures. It cannot honestly invent five distinct modes if fewer are observed.
-- Tests no longer require golden labels to remain empty after you complete them.
+Zaid has completed the 50 development rows in the revised uploaded workbook.
+Do not repeat those rows. The repository still contains the original candidate
+workbook until the revised file is imported. See data/ANNOTATION_STATUS.md.
 
-## Required work only you can supply
+## Engineering workflow
 
-1. Open data/golden_set.xlsx. Independently label all 200 rows (50 dev, 150 test) using its Method tab. Enter your name and YES only after real review. The workbook was deliberately left untouched.
-2. Run the commands below. Inspect calibration's coverage and denominators; a tiny safe sample does not establish safety.
-3. Blind-rate the resulting 60 replies before viewing the judge output. Configure a compatible judge endpoint locally; never send API secrets in chat or commit them.
-4. Run agreement and final report commands in README. Review the measured failure groups and write the top five actual root causes with representative examples. Merge measured sections into REPORT.md, keep the report concise, and remove pending claims only when supported.
+1. Copy the revised workbook to data/golden_set.xlsx, preserving the original upload.
+2. Run `bash scripts/develop.sh`. It trains the classifier, runs tests, calibrates
+   on dev only, and writes development predictions, metrics and input hashes.
+3. Inspect artifacts/development/calibration.json. Zero automatic coverage is a
+   failed search for useful thresholds, not successful safety calibration.
+4. Freeze the selected implementation and configuration before the test run.
+5. After the test labels are complete, run `bash scripts/evaluate.sh`.
+6. Use the README commands to generate the 60-output blinded rating sheet.
+7. After human ratings, run the configured judge, score agreement, and generate
+   REPORT_RESULTS.md. Incorporate actual measured failures into REPORT.md.
 
-```bash
-bash scripts/reproduce.sh
-python3 -m evals.calibrate --dev data/golden_set.xlsx
-bash scripts/evaluate.sh
-```
+## Human input still required
 
-The remaining README commands create the blind rating sheet, call the judge,
-save agreement.json and create REPORT_RESULTS.md. The judge refuses to overwrite
-an existing rating file; keep successful runs and use a new output path if retrying.
+- Label the 150 held-out test rows using the Method tab.
+- Rate the 60 blinded replies before inspecting judge ratings.
 
-No judge endpoint, model, or key was configured in the build environment, so no
-live judge results are included. No human labels or agreement evidence are fabricated.
+A compatible judge endpoint and model must also be configured locally. No live
+judge results are available yet. Keep API credentials out of committed files.
 
-## Reproducibility caveats
+## Limits of the current prototype
 
-- The bundled diagnostic set has heuristic labels, not ground truth. Never copy its numbers into headline results.
-- Sampling is 70% non-challenge pool and 30% challenge pool, not 70% natural traffic.
-- The offline action allowlist covers tracking checks, delivery-location/neighbour checks, restarts and updates. This trades coverage for auditability; unsupported intents still classify but generally hand off.
-- Evidence ID validation does not prove semantic entailment. Blind reply review remains required, especially if enabling the optional live drafting adapter.
-- A reviewer can reproduce the local metric computation quickly once YOUR labels and saved ratings are included. Building those labels is preparation work, not part of a claimed three-second evaluation.
-- In the refreshed 100-example WEAK-LABEL diagnostic, B2 auto-handles only 1 example. This is evidence of very low provisional coverage, not trustworthy safety performance (0 unsafe out of 1 is inconclusive). Improving coverage remains an empirical task after human review.
-- HLD.md and LLD.md are design references, not evidence that every proposed production feature exists. No deployment or sending service is required by the assignment.
+- Offline guidance uses a narrow allowlist conditioned on historical replies and
+  customer symptoms. It does not know current policy or account status.
+- Handoffs explain that human support needs to review the request; they do not
+  claim that a check or an actual handoff has happened.
+- Software-update matching excludes phrases such as "keep us updated."
+- Feature questions do not receive restart/update advice merely because a
+  retrieved response contains those words.
+- The saved artifacts/latest run is an older weak-label diagnostic. It predates
+  these changes and must not be used as current development or final results.
+- HLD.md and LLD.md describe proposed production features; they are not evidence
+  that all such features exist. The prototype does not send customer messages.
+
+## Verification status
+
+The added GitHub Actions workflow runs compilation and the offline test suite.
+Use the result for the exact commit being reviewed. No final evaluation, judge
+agreement, or successful threshold calibration is claimed by this update.

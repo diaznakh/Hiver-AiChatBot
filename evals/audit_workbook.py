@@ -34,7 +34,19 @@ def main():
             complete_test.append(row)
         except ValueError:
             pass
+    missing = {}
+    test_raw = [row for row in raw if row["split"] == "test"]
+    for field in ("correct_intent", "correct_route", "good_reply_should_mention",
+                  "reviewer_name", "human_reviewed"):
+        missing[field] = sum(not row.get(field, "").strip() for row in test_raw)
     report = {
+        "test_blank_fields": missing,
+        "test_review_flags": dict(Counter(row.get("human_reviewed", "") for row in test_raw)),
+        "test_invalid_intents": sum(bool(row["labels"]["primary_intent"]) and row["labels"]["primary_intent"] not in {
+            "account_prime", "delivery_tracking", "digital_service", "order_change",
+            "other_unclear", "payment_charge", "product_issue", "return_refund"} for row in test),
+        "test_invalid_routes": sum(bool(row["labels"]["expected_route"]) and row["labels"]["expected_route"] not in {
+            "AUTO_HANDLE", "ESCALATE"} for row in test),
         "input_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
         "source_fields_unchanged": True,
         "development_rows": len(dev),

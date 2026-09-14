@@ -1,20 +1,20 @@
 # Annotation status
 
-The revised workbook is imported at `data/golden_set.xlsx`.
-Automated audit confirmed 200 distinct examples, unchanged source messages,
-conversation IDs, tweet IDs, history IDs and splits.
+The revised workbook is imported at data/golden_set.xlsx.
+All 200 rows pass required-field, taxonomy and review-flag validation:
+50 development and 150 held-out test examples, reviewed by Zaid Khan.
 
-- Development: 50 completed rows, reviewed by Zaid Khan; 41 ESCALATE and 9 AUTO_HANDLE.
-- Held-out test: 150 rows; zero complete, 150 pending.
-- Workbook SHA256: `c0fbf3c1b712ab5ebe6d6d923d983063c80c4d85fb4342e59e8eed81cbe00392`.
+Development routes: 41 ESCALATE, nine AUTO_HANDLE.
+Test routes: 148 ESCALATE, two AUTO_HANDLE.
+All 200 human_reviewed flags are YES.
 
-AI label suggestions and review guidance were used during development. The
-reviewer reports completing the final development rows himself. This does not
-claim an independent, blinded annotation process.
+Excel numeric ID representations are normalized exactly; source messages,
+IDs and splits match the original data. The XLSX is authoritative for labels.
+The committed data/golden_set.csv remains the original source snapshot.
 
-The XLSX is authoritative for labels. The committed data/golden_set.csv is the
-original source snapshot used for identity checks. A CSV export of the updated
-workbook is included in the development workflow artifact.
+AI label suggestions and review guidance were used during development.
+The reviewer reports completing the labels himself. Validation does not
+independently establish semantic correctness or an independent annotation process.
 
-Development metrics are tuning evidence, not held-out results. Human reply
-ratings and live judge ratings remain pending.
+The held-out evaluation is recorded in artifacts/official/README.md.
+The 60 blinded reply ratings and live judge agreement remain pending.

@@ -1,0 +1,15 @@
+{
+  "config_sha256": "8be4bab84cf2914d0150c597171178ad90ed6e76a58647f6043b2560c1e9d182",
+  "examples": 150,
+  "gateway": "offline",
+  "input": "data/golden_set.xlsx",
+  "input_sha256": "a3671a0789aad8d00b3aae622260233b772efe35be257af6d9f09ef82f951ba3",
+  "mode": "official",
+  "split": "test",
+  "systems": [
+    "b0",
+    "b1",
+    "b2"
+  ],
+  "warning": null
+}

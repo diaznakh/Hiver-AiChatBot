@@ -79,8 +79,8 @@ Machine-generated labels are not presented as human ground truth. Official evalu
 The revised workbook is imported and its 50 development rows passed validation.
 See [annotation status](data/ANNOTATION_STATUS.md) and the measured
 [development review](artifacts/development/REVIEW.md). B2 achieved 46% intent
-accuracy and zero automatic coverage; no useful threshold was found. The 150
-test rows and blinded reply ratings remain pending.
+accuracy and zero automatic coverage; no useful threshold was found. All 150 test rows are now complete. The held-out run is recorded in
+[official results](artifacts/official/README.md); blinded reply ratings remain pending.
 
 To reproduce the development evaluation, run:
 
@@ -164,7 +164,10 @@ Agreement is reported with weighted kappa for groundedness, relevance, helpfulne
 
 The prototype, real-data subset, baseline implementations, evaluation workflows, shared anchored judge rubric, and report generator are implemented. The offline test workflow checks each code update; consult its result for the current commit. This is not yet a completed evaluation or submission.
 
-Final headline numbers require the completed held-out test labels. Judge-human agreement additionally requires the blinded reply ratings and a configured judge run. The 50 development rows do not need to be repeated.
+All 200 labels pass validation, and the 150-row held-out evaluation has run.
+B2 achieves 50% intent accuracy and zero automatic coverage. Human reply ratings
+and judge agreement remain pending; see [official results](artifacts/official/README.md).
+Completed golden labels do not need repeating.
 
 ## Repository structure
 

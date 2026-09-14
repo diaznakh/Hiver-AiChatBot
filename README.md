@@ -76,11 +76,13 @@ Machine-generated labels are not presented as human ground truth. Official evalu
 
 ## Reviewed development evaluation
 
-Zaid completed the 50 development rows in the revised upload. Import of that
-workbook into this repository is pending; see [annotation status](data/ANNOTATION_STATUS.md).
-The 150 test rows and blinded reply ratings remain pending.
+The revised workbook is imported and its 50 development rows passed validation.
+See [annotation status](data/ANNOTATION_STATUS.md) and the measured
+[development review](artifacts/development/REVIEW.md). B2 achieved 46% intent
+accuracy and zero automatic coverage; no useful threshold was found. The 150
+test rows and blinded reply ratings remain pending.
 
-After placing the revised workbook at `data/golden_set.xlsx`, run:
+To reproduce the development evaluation, run:
 
 ```bash
 bash scripts/develop.sh

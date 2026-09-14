@@ -3,12 +3,11 @@
 ## Completed development review
 
 Zaid has completed the 50 development rows in the revised uploaded workbook.
-Do not repeat those rows. The repository still contains the original candidate
-workbook until the revised file is imported. See data/ANNOTATION_STATUS.md.
+Do not repeat those rows. The revised workbook is imported and passed the source-field and label audit. See data/ANNOTATION_STATUS.md.
 
 ## Engineering workflow
 
-1. Copy the revised workbook to data/golden_set.xlsx, preserving the original upload.
+1. The revised workbook is already at data/golden_set.xlsx; preserve its completed dev labels.
 2. Run `bash scripts/develop.sh`. It trains the classifier, runs tests, calibrates
    on dev only, and writes development predictions, metrics and input hashes.
 3. Inspect artifacts/development/calibration.json. Zero automatic coverage is a
@@ -44,5 +43,6 @@ judge results are available yet. Keep API credentials out of committed files.
 ## Verification status
 
 The added GitHub Actions workflow runs compilation and the offline test suite.
-Use the result for the exact commit being reviewed. No final evaluation, judge
-agreement, or successful threshold calibration is claimed by this update.
+The evaluated commit passed all 33 tests. Development metrics are recorded in
+artifacts/development/REVIEW.md. No final test evaluation, judge agreement, or
+successful threshold calibration is claimed.

@@ -1,0 +1,20 @@
+{
+  "candidate_pairs": 80,
+  "development_auto_count": 0,
+  "development_coverage": 0,
+  "development_escalation_recall": 1,
+  "development_examples": 50,
+  "development_unsafe_auto_count": 0,
+  "development_unsafe_auto_rate": null,
+  "feasible_pairs": 80,
+  "gold_auto_count": 9,
+  "gold_escalate_count": 41,
+  "input_sha256": "c0fbf3c1b712ab5ebe6d6d923d983063c80c4d85fb4342e59e8eed81cbe00392",
+  "max_unsafe_auto_rate": 0.05,
+  "min_escalation_recall": 0.95,
+  "status": "NO_USEFUL_AUTO_THRESHOLD_FOUND",
+  "tau_evidence": null,
+  "tau_intent": null,
+  "useful_feasible_pairs": 0,
+  "warning": "No useful threshold met the constraints. Automatic handling disabled; zero auto replies provide no safety evidence."
+}

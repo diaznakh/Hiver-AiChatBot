@@ -1,18 +1,20 @@
 # Annotation status
 
-The working review recorded 50 completed development rows in the uploaded
-`Golden Set(3).xlsx`: 41 ESCALATE and 9 AUTO_HANDLE, reviewed by Zaid Khan.
-The 150 held-out test rows remain unlabelled in that version.
+The revised workbook is imported at `data/golden_set.xlsx`.
+Automated audit confirmed 200 distinct examples, unchanged source messages,
+conversation IDs, tweet IDs, history IDs and splits.
+
+- Development: 50 completed rows, reviewed by Zaid Khan; 41 ESCALATE and 9 AUTO_HANDLE.
+- Held-out test: 150 rows; zero complete, 150 pending.
+- Workbook SHA256: `c0fbf3c1b712ab5ebe6d6d923d983063c80c4d85fb4342e59e8eed81cbe00392`.
 
 AI label suggestions and review guidance were used during development. The
-reviewer reports completing the final development rows himself. This document
-does not claim an independent, blinded annotation process.
+reviewer reports completing the final development rows himself. This does not
+claim an independent, blinded annotation process.
 
-The revised upload has not yet been copied into this GitHub repository.
-The committed workbook and CSV remain the original candidate files.
-Import the final workbook before running development calibration; do not
-recreate or overwrite completed labels with generated suggestions.
+The XLSX is authoritative for labels. The committed data/golden_set.csv is the
+original source snapshot used for identity checks. A CSV export of the updated
+workbook is included in the development workflow artifact.
 
-Development metrics are tuning evidence. Only a separate run on the completed
-test split can provide held-out metrics. Human reply ratings and live judge
-ratings are still required for agreement measurement.
+Development metrics are tuning evidence, not held-out results. Human reply
+ratings and live judge ratings remain pending.

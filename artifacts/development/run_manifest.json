@@ -1,0 +1,15 @@
+{
+  "config_sha256": "22d5c6ccebf49664be7e4f035f37263e741bb3cb61f2f880834f9d9cedae6531",
+  "examples": 50,
+  "gateway": "offline",
+  "input": "data/golden_set.xlsx",
+  "input_sha256": "c0fbf3c1b712ab5ebe6d6d923d983063c80c4d85fb4342e59e8eed81cbe00392",
+  "mode": "development",
+  "split": "dev",
+  "systems": [
+    "b0",
+    "b1",
+    "b2"
+  ],
+  "warning": "Reviewed development data used for tuning; not held-out test results. See data/ANNOTATION_STATUS.md."
+}

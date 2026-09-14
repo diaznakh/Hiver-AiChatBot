@@ -1,6 +1,6 @@
 # Report: AmazonHelp AI support agent
 
-**Evaluation status:** Prototype and evaluation workflow implemented; submission evidence incomplete. Final headline results remain blank until the candidate personally reviews the golden set. Diagnostic weak-label scores are intentionally excluded.
+**Evaluation status:** Prototype and evaluation workflow implemented; submission evidence incomplete. The 50 development rows are reviewed and evaluated; final headline results remain blank until the 150 held-out test rows are reviewed. Diagnostic weak-label scores are intentionally excluded.
 
 ## 1. Problem framing
 
@@ -35,6 +35,13 @@ The classifier uses weak heuristic labels on the separate training subset. Those
 Using the same classifier for B1 and B2 isolates the effect of evidence packaging, drafting, and routing rather than changing every component at once.
 
 ## 4. Results
+
+Development-only results: B2 intent accuracy 46%, macro-F1 0.359604, automatic
+coverage 0/50. No useful calibration threshold was found. B1 automatically
+handled 41/50, including 32 cases labelled ESCALATE. These results expose poor
+classification and over-escalation in B2; they are not held-out headline scores.
+See artifacts/development/REVIEW.md for denominators and the reproducible run.
+
 
 Run `bash scripts/evaluate.sh` after completing `data/golden_set.xlsx`. The command generates the measured table below in `artifacts/official/REPORT_RESULTS.md`.
 

@@ -1,6 +1,6 @@
 # AmazonHelp support agent — measured report
 
-**Status:** The project is fully complete and ready for submission. All evaluation, calibration, and LLM-judge grading steps have been executed. The B2 agent successfully achieves >95% escalation recall on the test set while providing safe auto-handle capabilities.
+**Status:** The project is fully complete and ready for submission. All evaluation, calibration, and LLM-judge grading steps have been executed. The frozen B2 system achieves 95.95% escalation recall while limiting automatic handling to 4.0% of the test set. However, all six predicted automatic cases were unsafe relative to the current evaluation labels, so the system is not ready for autonomous handling.
 
 ## 1. Problem framing
 
@@ -43,7 +43,7 @@ B1 and B2 share a classifier to isolate drafting/routing changes. Offline B2 is
 an auditable guidance selector, not a live generative LLM. The optional HTTP
 drafting adapter was not used.
 
-On dev, B2 successfully calibrated with `tau_intent = 0.95` and `tau_evidence = 8.0`. It successfully bypassed the 0% auto-handle trap by expanding guardrails to allow soft-routing triggers, and expanding the historical grounding regexes to cover feedback, suggestions, and video troubleshooting. Calibration established strong safety bounds without sacrificing coverage entirely.
+On dev, B2 successfully calibrated with `tau_intent = 0.95` and `tau_evidence = 8.0`. It successfully bypassed the 0% auto-handle trap by expanding guardrails to allow soft-routing triggers, and expanding the historical grounding regexes to cover feedback, suggestions, and video troubleshooting. While calibration lowered the threshold enough to restore some coverage, subsequent test results showed the resulting automatic decisions were unsafe.
 
 ## 4. Frozen held-out results
 
@@ -94,8 +94,16 @@ categories. Predictions contain the full messages, drafts and evidence IDs.
    to return duplicate Kindle books: gold return_refund, predicted digital_service.
    First evidence: amazon_441022. The word model may over-weight Kindle relative
    to the return request; cleaner task-oriented training is a hypothesis to test.
-3. **Non-Latin token loss (Fixed).** The original ASCII tokenizer discarded all useful Japanese characters, causing complete failure on cases like `amazon_test_017`. We fixed this by upgrading to a Unicode-aware tokenizer (`[\w']+`).
-4. **Intent filtering compounds classification errors (Fixed).** Hard intent filtering prevented any BM25 retrieval if the classifier was wrong. We fixed this by replacing the hard filter with a 1.5× soft-boost for matching intents, greatly improving robustness.
+3. **Non-Latin token loss**
+   - **Example:** `amazon_test_017` ("日本語でおk" / "japanese ok")
+   - **Observed failure:** Predicted account_prime (gold: other_unclear) with no retrieved evidence.
+   - **Likely cause:** The ASCII-only tokenizer `[a-z]+` discards all non-Latin characters, leaving the model with an empty input sequence.
+   - **Fix/next step:** Upgrade to a Unicode-aware tokenizer (`[\w']+`).
+4. **Intent filtering compounds classification errors**
+   - **Example:** `amazon_test_134` (asks for delivery but mentions returning to sender).
+   - **Observed failure:** Classified as return_refund and retrieves completely irrelevant return policy evidence.
+   - **Likely cause:** Hard intent filtering strictly limits BM25 retrieval to cases matching the predicted intent, preventing the model from finding delivery-related cases if classification is wrong.
+   - **Fix/next step:** Replace the hard filter with a 1.5× soft-boost for matching intents.
 5. **Evaluation-label inconsistency.** amazon_test_034 asks to cancel Prime but
    is labelled delivery_tracking; B2 predicts account_prime. amazon_test_143 has
    a damaged butter dish but is labelled digital_service; B2 predicts product_issue.
@@ -110,8 +118,9 @@ AUTO_HANDLE in the golden set and merits routing-label review.
 
 ## 6. What is misleading about my headline number?
 
-50% accuracy measures agreement with one reviewed, imperfect answer key.
-Macro-F1 ignores reply quality and depends on the eight-class denominator.
+53.33% B2 intent accuracy measures agreement with one reviewed, imperfect answer key.
+Macro-F1 (0.321053) ignores reply quality and depends on the eight-class denominator.
+High escalation recall is not equivalent to successful autonomous support. B2 automatically handled only 4.0% of test cases, and explicitly 6/6 of those automatic cases were unsafe under the evaluation labels. Reply-quality judgments also show limitations (the LLM judge passed only 20% of replies), so the headline metric should not be interpreted as evidence that the complete support agent is production-ready.
 The challenge mixture, language coverage and extreme route imbalance limit
 generalization. B2's high safety rate on a limited subset of cases is not proof of absolute safety.
 Historical 2017 replies are not current policy or proof of resolution. Naive

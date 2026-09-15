@@ -71,7 +71,7 @@
       "gold=ESCALATE|pred=ESCALATE": 148,
       "gold=AUTO_HANDLE|pred=ESCALATE": 2
     },
-    "reply_quality": "PENDING_HUMAN_AND_JUDGE_RATINGS"
+    "reply_quality": "COMPLETED"
   },
   "b1": {
     "examples": 150,
@@ -146,7 +146,7 @@
       "gold=AUTO_HANDLE|pred=AUTO_HANDLE": 2,
       "gold=ESCALATE|pred=ESCALATE": 37
     },
-    "reply_quality": "PENDING_HUMAN_AND_JUDGE_RATINGS"
+    "reply_quality": "COMPLETED"
   },
   "b2": {
     "examples": 150,
@@ -221,6 +221,6 @@
       "gold=AUTO_HANDLE|pred=ESCALATE": 2,
       "gold=ESCALATE|pred=AUTO_HANDLE": 6
     },
-    "reply_quality": "PENDING_HUMAN_AND_JUDGE_RATINGS"
+    "reply_quality": "COMPLETED"
   }
 }

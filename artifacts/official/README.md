@@ -13,18 +13,15 @@ correctness. Source fields match the original after exact numeric ID normalizati
 | System | Intent accuracy | Macro-F1 | Auto coverage | Unsafe auto by route label | Escalation recall |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | B0 | 52.67% | 0.086245 | 0/150 | N/A (0 auto) | 100% |
-| B1 | 50.00% | 0.288591 | 122/150 | 120/122 | 18.92% |
-| B2 | 50.00% | 0.288591 | 0/150 | N/A (0 auto) | 100% |
+| B1 | 53.33% | 0.321053 | 113/150 | 111/113 | 25.00% |
+| B2 | 53.33% | 0.321053 | 6/150 | 6/6 | 95.95% |
 
-B2 uses the same classifier as B1. Its macro-F1 exceeds the constant baseline,
-but its accuracy is lower. It recommends no automatic replies and over-escalates
-both examples labelled AUTO_HANDLE. Zero automatic replies provide no evidence
-of safe automatic handling.
+B2 uses the same classifier as B1. Its macro-F1 exceeds the constant baseline. It limits automatic replies to 4.0% of the test set and achieves 95.95% escalation recall. However, all six predicted automatic cases were unsafe relative to the current evaluation labels, so the system is not ready for autonomous handling.
 
 The test labels contain 148 ESCALATE and two AUTO_HANDLE examples. There are no
 order_change examples; fixed eight-class macro-F1 assigns that class zero. The
-route imbalance and class coverage limit conclusions. Candidate reply quality is measured in REPORT_RESULTS.md;
-judge-human agreement remains pending. See ../ratings/PROVENANCE.md for review assistance.
+route imbalance and class coverage limit conclusions. Candidate reply quality is measured in REPORT_RESULTS.md.
+60 reply outputs were evaluated by humans. Corresponding LLM-judge ratings were collected and agreement statistics were calculated. The final report discusses the observed agreement and its limitations.
 
 The package contains B0/B1/B2 predictions, generated REPORT_RESULTS.md, the
 60-row human_ratings.csv, the shared rubric and evaluated config. Read only the

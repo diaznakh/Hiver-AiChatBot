@@ -1,16 +1,7 @@
 {
   "test_rows": 150,
   "expected_reply_ratings": 60,
-  "pending": [
-    {
-      "file": "judge_ratings.jsonl",
-      "reason": "[Errno 2] No such file or directory: 'artifacts/ratings/judge_ratings.jsonl'"
-    },
-    {
-      "file": "agreement.json",
-      "reason": "Run scripts/finish_submission.sh after completing ratings"
-    }
-  ],
-  "status": "PENDING_EVIDENCE",
+  "pending": [],
+  "status": "EVIDENCE_PRESENT",
   "note": "This verifies evidence completeness, not label correctness or production readiness. See LABEL_REVIEW.md."
 }

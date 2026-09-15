@@ -113,7 +113,7 @@ AUTO_HANDLE in the golden set and merits routing-label review.
 50% accuracy measures agreement with one reviewed, imperfect answer key.
 Macro-F1 ignores reply quality and depends on the eight-class denominator.
 The challenge mixture, language coverage and extreme route imbalance limit
-generalization. Zero unsafe B2 replies at zero coverage is not safety evidence.
+generalization. B2's high safety rate on a limited subset of cases is not proof of absolute safety.
 Historical 2017 replies are not current policy or proof of resolution. Naive
 Bayes probabilities are not reliable confidence calibration. Passing software
 tests establishes tested code properties, not product quality.
@@ -133,8 +133,7 @@ accuracy / 0.482580 macro-F1; word SVM 54% / 0.462132; character SVM
 the frozen agent and no post-hoc test score is claimed for them.
 
 Next: adjudicate flagged labels with a change log; audit clean training examples;
-add evidence-supported acknowledgement and clarification; compare retrieval
-without hard intent filtering. Complete the configured judge run and report actual agreement. A later test-informed model revision needs
+add evidence-supported acknowledgement and clarification. A later test-informed model revision needs
 a fresh untouched holdout for an independent assessment.
 
 ## Reproduce

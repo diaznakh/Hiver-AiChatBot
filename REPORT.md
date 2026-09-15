@@ -62,6 +62,7 @@ B2 classified 75/150 correctly and escalated both gold-auto cases. B0's higher
 accuracy reflects 79 delivery-labelled examples. B2's broader class coverage
 raises macro-F1 but does not establish useful automation. Its original p95
 latency was 9.402 ms for local offline inference, not production or live-LLM latency.
+Compared to B0 (trivial) which issues a fixed acknowledgement, B2 drafts contextual replies. Compared to B1 (simple) which retrieves the nearest BM25 reply, B2 narrows guidance using intent filtering. However, neither improves upon B0's 100% escalation safety, as B2's 4.0% automatic routing resulted entirely in unsafe actions.
 
 Test labels contain 148 ESCALATE and two AUTO_HANDLE cases, with no order_change
 examples. Macro-F1 uses all eight classes and assigns zero to the unsupported
@@ -86,14 +87,16 @@ LLM-as-judge evaluation was successfully run using Gemini 3.5 Flash-Lite. The ju
 These are representative observed problems, not five ranked, mutually exclusive
 categories. Predictions contain the full messages, drafts and evidence IDs.
 
-1. **Unnecessary social-message handoff.** amazon_test_003 jokes about a helpful
-   support call: gold other_unclear/AUTO_HANDLE, predicted order_change/ESCALATE.
-   Its account-review draft is inappropriate. First evidence: amazon_1119594.
-   Missing acknowledgement behaviour and order vocabulary plausibly contribute.
-2. **Mixed-intent vocabulary beats the requested action.** amazon_test_012 asks
-   to return duplicate Kindle books: gold return_refund, predicted digital_service.
-   First evidence: amazon_441022. The word model may over-weight Kindle relative
-   to the return request; cleaner task-oriented training is a hypothesis to test.
+1. **Unnecessary social-message handoff**
+   - **Example:** `amazon_test_003` (jokes about a helpful support call).
+   - **Observed failure:** Predicted order_change/ESCALATE with an inappropriate account-review draft.
+   - **Likely cause:** Missing acknowledgement behaviour and over-indexing on order-related vocabulary.
+   - **Fix/next step:** Add specific training examples for social/joking interactions.
+2. **Mixed-intent vocabulary beats the requested action**
+   - **Example:** `amazon_test_012` (asks to return duplicate Kindle books).
+   - **Observed failure:** Predicted digital_service (gold: return_refund).
+   - **Likely cause:** The word model heavily over-weights "Kindle" relative to the return request verbs.
+   - **Fix/next step:** Use cleaner task-oriented training data that emphasizes verbs/actions over nouns.
 3. **Non-Latin token loss**
    - **Example:** `amazon_test_017` ("日本語でおk" / "japanese ok")
    - **Observed failure:** Predicted account_prime (gold: other_unclear) with no retrieved evidence.
@@ -104,11 +107,11 @@ categories. Predictions contain the full messages, drafts and evidence IDs.
    - **Observed failure:** Classified as return_refund and retrieves completely irrelevant return policy evidence.
    - **Likely cause:** Hard intent filtering strictly limits BM25 retrieval to cases matching the predicted intent, preventing the model from finding delivery-related cases if classification is wrong.
    - **Fix/next step:** Replace the hard filter with a 1.5× soft-boost for matching intents.
-5. **Evaluation-label inconsistency.** amazon_test_034 asks to cancel Prime but
-   is labelled delivery_tracking; B2 predicts account_prime. amazon_test_143 has
-   a damaged butter dish but is labelled digital_service; B2 predicts product_issue.
-   These conflict with the taxonomy and need human adjudication. Original labels
-   and scores remain unchanged.
+5. **Evaluation-label inconsistency**
+   - **Example:** `amazon_test_034` (asks to cancel Prime but is labelled delivery_tracking).
+   - **Observed failure:** B2 correctly predicts account_prime but is penalized against the flawed golden label.
+   - **Likely cause:** Ambiguity in the original dataset taxonomy and inconsistent human labeling.
+   - **Fix/next step:** Require human adjudication to correct the golden test labels.
 
 B2 produced only two distinct drafts across 150 outputs. Two examples had no
 retrieved evidence. INSUFFICIENT_EVIDENCE appears on 134 outputs; reason counts
@@ -118,14 +121,7 @@ AUTO_HANDLE in the golden set and merits routing-label review.
 
 ## 6. What is misleading about my headline number?
 
-53.33% B2 intent accuracy measures agreement with one reviewed, imperfect answer key.
-Macro-F1 (0.321053) ignores reply quality and depends on the eight-class denominator.
-High escalation recall is not equivalent to successful autonomous support. B2 automatically handled only 4.0% of test cases, and explicitly 6/6 of those automatic cases were unsafe under the evaluation labels. Reply-quality judgments also show limitations (the LLM judge passed only 20% of replies), so the headline metric should not be interpreted as evidence that the complete support agent is production-ready.
-The challenge mixture, language coverage and extreme route imbalance limit
-generalization. B2's high safety rate on a limited subset of cases is not proof of absolute safety.
-Historical 2017 replies are not current policy or proof of resolution. Naive
-Bayes probabilities are not reliable confidence calibration. Passing software
-tests establishes tested code properties, not product quality.
+53.33% intent accuracy does not mean the complete agent is 53.33% reliable. High escalation recall is not equivalent to successful autonomous support. The agent automatically handled only 4.0% of test cases, and all 6/6 of those automatic cases were unsafe under the evaluation labels. Furthermore, reply quality has significantly different results depending on whether humans or the LLM judge evaluate it. Therefore, the headline metric alone is insufficient to claim production readiness.
 
 ## 7. Improvement experiment and one more week
 

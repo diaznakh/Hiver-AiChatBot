@@ -105,7 +105,7 @@ def main() -> None:
         lines.extend(["PENDING: configured LLM-judge run and judge–human agreement. Human scores above, when supplied, are measured separately. This report is not submission-complete.", ""])
     lines.extend([
         "## What is misleading about my headline number?", "",
-        "Macro-F1 gives every intent equal weight but does not describe reply quality or routing safety. Coverage must be shown beside unsafe-auto outcomes because an always-escalate system can appear safe while doing no useful automatic work. The challenge slice is deliberately oversampled, so its mixed score is not a natural-traffic estimate. Historical Twitter replies are behavior evidence, not current policy. A zero unsafe count is not proof of zero risk; report its exact denominator and one-sided bound.", "",
+        "53.33% intent accuracy does not mean the complete agent is 53.33% reliable. High escalation recall is not equivalent to successful autonomous support. The agent automatically handled only 4.0% of test cases, and all 6/6 of those automatic cases were unsafe under the evaluation labels. Furthermore, reply quality has significantly different results depending on whether humans or the LLM judge evaluate it. Therefore, the headline metric alone is insufficient to claim production readiness.", "",
         "## One more week", "",
         "I would review retrieval misses, compare a dense/hybrid retriever only where BM25 fails semantically, add owner-approved current policy, expand blind human safety ratings, test injection and outage cases, and run a larger shadow evaluation before enabling any delivery action.", "",
     ])

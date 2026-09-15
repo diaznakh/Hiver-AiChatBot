@@ -1,24 +1,15 @@
 # AmazonHelp AI support agent
 
+**What I built:** An AI customer support agent that predicts customer intents, drafts historically grounded replies, and recommends `AUTO_HANDLE` or `ESCALATE` routing decisions with explainable reasons. This is the Hiver SDE Intern take-home solution.
+**Brand & Dataset:** AmazonHelp, using the *Customer Support on Twitter* dataset (169,840 brand replies filtered down to 5,600 training cases and 200 golden evaluation rows).
+**Architecture:** Offline pipeline using a Naive Bayes intent classifier, Okapi BM25 retrieval for historical guidance, and deterministic safety guardrails.
+**Final Result (B2):** 53.33% intent accuracy, 95.95% escalation recall, and 4.0% automatic coverage. (Note: 6/6 automatic cases were unsafe, meaning the system is conservative but autonomous handling is not yet safe).
+**Limitations & Report:** Read [REPORT.md](REPORT.md) for the measured report, five actual failure modes, and the "What is misleading about my headline number?" caveats.
+
 ## Submission snapshot
-
-Read [REPORT.md](REPORT.md) for the measured report and five actual failure modes.
-All 200 golden rows are complete; the frozen 150-row test run is saved.
-All candidate reply ratings are integrated and the final metrics have been generated.
-The [60-reply rating CSV](artifacts/ratings/human_ratings.csv) is available directly
-in the repository. 
-
-See [LABEL_REVIEW.md](LABEL_REVIEW.md) for four semantic annotation concerns that schema checks cannot detect.
-
-This repository is the Hiver SDE Intern take-home solution. It uses real AmazonHelp conversations from the Customer Support on Twitter dataset.
-
-For each incoming customer message, the agent returns exactly the three things required by the assignment:
-
-1. A predicted intent.
-2. A reply draft grounded in similar historical AmazonHelp conversations.
-3. An `AUTO_HANDLE` or `ESCALATE` decision with a reason.
-
-The project includes a 200-example golden-set candidate workbook (see annotation status below), two baselines, automated metrics, a blinded LLM-as-judge workflow, a report draft, and a 15-item decision log. It does not send tweets or perform account actions.
+- All 200 golden rows are complete; the frozen 150-row test run is saved.
+- All candidate reply ratings are integrated and final metrics generated.
+- The [60-reply rating CSV](artifacts/ratings/human_ratings.csv) and [LABEL_REVIEW.md](LABEL_REVIEW.md) (for annotation concerns) are included.
 
 ## Dataset and brand choice
 
@@ -111,7 +102,7 @@ python3 -m evals.calibrate --dev data/golden_set.xlsx
 bash scripts/evaluate.sh
 ```
 
-This retrains the classifier, evaluates all three systems on the same 150 locked test examples, writes predictions and metrics to `artifacts/official/`, and generates `artifacts/official/REPORT_RESULTS.md`. The run takes well under 15 minutes on the bundled 5,600-case subset.
+This retrains the classifier, evaluates all three systems on the same 150 locked test examples, writes predictions and metrics to `artifacts/official/`, and generates `artifacts/official/REPORT_RESULTS.md`. Core evaluation reproduced locally in approximately 1-2 minutes on macOS.
 
 The compared systems are:
 
@@ -170,10 +161,17 @@ Agreement is reported with weighted kappa for groundedness, relevance, helpfulne
 
 ## Current status
 
-The project is fully complete and ready for submission. The B2 agent successfully achieves >95% escalation recall on the unseen test set, avoiding the 0% auto-handle trap through expanded guardrails and offline tokenizer/classifier improvements. 
+The project is fully complete and ready for submission. The B2 agent is highly conservative, achieving 95.95% escalation recall on the unseen test set and avoiding the 0% auto-handle trap. However, autonomous handling has not yet been demonstrated as safe.
 
-All 200 labels pass validation, and the 150-row held-out evaluation has been successfully executed.
-B2 achieves ~53.3% intent accuracy and successfully automates safe tickets while strictly escalating complex/unsafe queries. See [official results](artifacts/official/REPORT_RESULTS.md) for full metrics.
+All 200 labels pass validation, and the 150-row held-out evaluation has been successfully executed. See [official results](artifacts/official/REPORT_RESULTS.md) for full metrics.
+
+| Metric | B0 | B1 | B2 |
+| --- | --- | --- | --- |
+| Intent accuracy | 52.67% | 53.33% | 53.33% |
+| Macro-F1 | 0.086 | 0.321 | 0.321 |
+| Auto coverage | 0% | 75.3% | 4.0% |
+| Escalation recall | 100% | 25.00% | 95.95% |
+| Unsafe auto | N/A | 111/113 | 6/6 |
 
 ## Repository structure
 

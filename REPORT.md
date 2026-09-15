@@ -1,7 +1,7 @@
 # AmazonHelp support agent — measured report
 
-**Status:** runnable prototype and frozen evaluation completed. Human reply ratings
-and LLM-judge agreement are pending. This is not yet a complete submission or a
+**Status:** runnable prototype and frozen evaluation completed. All 60 candidate reply ratings
+are integrated; LLM-judge agreement is pending. This is not yet a complete submission or a
 production-ready agent.
 
 ## 1. Problem framing
@@ -72,11 +72,23 @@ latency was 9.402 ms for local offline inference, not production or live-LLM lat
 
 Test labels contain 148 ESCALATE and two AUTO_HANDLE cases, with no order_change
 examples. Macro-F1 uses all eight classes and assigns zero to the unsupported
-class. Reply quality and judge-human agreement remain **unmeasured**. The blind
-rating sheet contains 60 outputs: 20 messages times three systems. Shared 1–5
-anchors assess groundedness, relevance, helpfulness and tone; four binary safety
-flags override high scores. Weighted/binary kappa, raw agreement, MAE and
-per-system quality summaries are implemented but require real ratings.
+class. The completed sample contains 60 replies: 20 messages × three systems.
+
+| System | Groundedness | Relevance | Helpfulness | Tone | Quality pass |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| B0 | 5.00 | 3.00 | 3.80 | 4.00 | 0/20 |
+| B1 | 4.60 | 3.75 | 3.90 | 3.90 | 13/20 |
+| B2 | 5.00 | 4.00 | 4.00 | 5.00 | 20/20 |
+
+Scores use 1–5 anchors. Passing requires all four scores ≥4 and no safety
+flags. B1 has one critical-hallucination flag; all other flags are zero.
+Zaid supplied the ratings; two B0 helpfulness scores were adjusted from 4 to 2
+by the assistant at his request (see artifacts/ratings/PROVENANCE.md).
+B2 received identical scores on all 20 replies. Its 100% sample pass rate
+does not establish resolution or safe automation: it still escalates everything.
+One reviewer, assisted review and shared messages limit generalization.
+Judge–human weighted/binary kappa, raw agreement and MAE remain pending a
+configured judge run. No agreement values have been invented.
 
 ## 5. Five observed failure modes
 
@@ -130,15 +142,14 @@ the frozen agent and no post-hoc test score is claimed for them.
 
 Next: adjudicate flagged labels with a change log; audit clean training examples;
 add evidence-supported acknowledgement and clarification; compare retrieval
-without hard intent filtering. Complete human ratings and the configured judge
-run, then report actual agreement. A later test-informed model revision needs
+without hard intent filtering. Complete the configured judge run and report actual agreement. A later test-informed model revision needs
 a fresh untouched holdout for an independent assessment.
 
 ## Reproduce
 
 Python 3.11+, no packages or API keys for the core: `bash scripts/evaluate.sh`.
 The bundled subset reproduced all systems in seconds locally. To finish reply
-evaluation, fill the saved rating CSV, configure JUDGE_API_URL, JUDGE_API_KEY and
+evaluation, use the completed rating CSV, configure JUDGE_API_URL, JUDGE_API_KEY and
 JUDGE_MODEL_ID locally, then run `bash scripts/finish_submission.sh`.
 It refuses incomplete human ratings. The optional classifier comparison needs
 scikit-learn 1.8.0 and runs with `python3 -m evals.compare_development`.

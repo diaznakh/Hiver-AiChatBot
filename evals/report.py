@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 from collections import defaultdict
-from .ratings import load, passed
+from .ratings import load, passed, summarize, DIMENSIONS
 from .blinding import blinded_output_id
 
 
@@ -77,11 +77,32 @@ def main() -> None:
             f"Hypothesis: {hypothesis}", "",
         ])
     lines.extend(["## Reply quality and judge-human agreement", ""])
+    if human:
+        from .check_submission import expected_rating_ids
+        from .run import load_examples
+        predictions = [json.loads(line) for system in ('b0', 'b1', 'b2')
+                       for line in (run / f'predictions_{system}.jsonl').read_text().splitlines()]
+        expected = expected_rating_ids(load_examples('data/golden_set.xlsx', 'test'), predictions, args.seed)
+        if set(human) != expected:
+            raise ValueError('Human ratings must match the exact 60-output sample')
+        mapping = {blinded_output_id(r['output_id'], args.seed): r['system_id'] for r in predictions}
+        summaries = {s: summarize([v for k, v in human.items() if mapping[k] == s]) for s in ('b0', 'b1', 'b2')}
+        (run.parent / 'ratings' / 'human_summary.json').write_text(json.dumps({
+            'outputs': len(human), 'messages': 20, 'by_system': summaries,
+            'provenance': 'See artifacts/ratings/PROVENANCE.md; candidate ratings include two assistant adjustments requested by the candidate.'
+        }, indent=2) + '\n')
+        lines.extend(['20 replies per system; means are on a 1–5 scale.', '',
+                      '| System | Groundedness | Relevance | Helpfulness | Tone | Quality pass |',
+                      '| --- | ---: | ---: | ---: | ---: | ---: |'])
+        for system, summary in summaries.items():
+            values = ' | '.join(f"{summary['mean_scores'][d]:.2f}" for d in DIMENSIONS)
+            lines.append(f"| {system.upper()} | {values} | {pct(summary['quality_pass_rate'])} |")
+        lines.extend(['', 'Pass requires every score ≥4 and no safety flags. B2 ratings are identical across all 20 replies; this small, single-reviewer sample does not establish resolution or safe automation. See artifacts/ratings/PROVENANCE.md for review assistance.', ''])
     if args.agreement:
         agreement = json.loads(Path(args.agreement).read_text())
         lines.extend(["```json", json.dumps(agreement, indent=2), "```", ""])
     else:
-        lines.extend(["PENDING: supply --agreement and --human-ratings after blind review. This report is not submission-complete.", ""])
+        lines.extend(["PENDING: configured LLM-judge run and judge–human agreement. Human scores above, when supplied, are measured separately. This report is not submission-complete.", ""])
     lines.extend([
         "## What is misleading about my headline number?", "",
         "Macro-F1 gives every intent equal weight but does not describe reply quality or routing safety. Coverage must be shown beside unsafe-auto outcomes because an always-escalate system can appear safe while doing no useful automatic work. The challenge slice is deliberately oversampled, so its mixed score is not a natural-traffic estimate. Historical Twitter replies are behavior evidence, not current policy. A zero unsafe count is not proof of zero risk; report its exact denominator and one-sided bound.", "",

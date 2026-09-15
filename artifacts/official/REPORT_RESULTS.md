@@ -43,7 +43,17 @@ Hypothesis: The safety gate was too conservative or the retrieved evidence was t
 
 ## Reply quality and judge-human agreement
 
-PENDING: supply --agreement and --human-ratings after blind review. This report is not submission-complete.
+20 replies per system; means are on a 1–5 scale.
+
+| System | Groundedness | Relevance | Helpfulness | Tone | Quality pass |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| B0 | 5.00 | 3.00 | 3.80 | 4.00 | 0.0% |
+| B1 | 4.60 | 3.75 | 3.90 | 3.90 | 65.0% |
+| B2 | 5.00 | 4.00 | 4.00 | 5.00 | 100.0% |
+
+Pass requires every score ≥4 and no safety flags. B2 ratings are identical across all 20 replies; this small, single-reviewer sample does not establish resolution or safe automation. See artifacts/ratings/PROVENANCE.md for review assistance.
+
+PENDING: configured LLM-judge run and judge–human agreement. Human scores above, when supplied, are measured separately. This report is not submission-complete.
 
 ## What is misleading about my headline number?
 

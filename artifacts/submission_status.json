@@ -3,10 +3,6 @@
   "expected_reply_ratings": 60,
   "pending": [
     {
-      "file": "human_ratings.csv",
-      "reason": "invalid literal for int() with base 10: ''"
-    },
-    {
       "file": "judge_ratings.jsonl",
       "reason": "[Errno 2] No such file or directory: 'artifacts/ratings/judge_ratings.jsonl'"
     },

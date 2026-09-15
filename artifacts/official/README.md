@@ -23,8 +23,8 @@ of safe automatic handling.
 
 The test labels contain 148 ESCALATE and two AUTO_HANDLE examples. There are no
 order_change examples; fixed eight-class macro-F1 assigns that class zero. The
-route imbalance and class coverage limit conclusions. Reply quality and
-judge-human agreement remain pending.
+route imbalance and class coverage limit conclusions. Candidate reply quality is measured in REPORT_RESULTS.md;
+judge-human agreement remains pending. See ../ratings/PROVENANCE.md for review assistance.
 
 The package contains B0/B1/B2 predictions, generated REPORT_RESULTS.md, the
 60-row human_ratings.csv, the shared rubric and evaluated config. Read only the

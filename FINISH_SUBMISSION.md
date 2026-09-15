@@ -6,7 +6,8 @@
 - Original source fields pass the audit after exact spreadsheet ID normalization.
 - The frozen 150-row B0/B1/B2 evaluation is saved and reproduced.
 - REPORT.md contains measured results, five real failure modes and limitations.
-- Predictions and the 60-output blinded rating sheet are committed.
+- Predictions and all 60 completed reply ratings are committed.
+- Human quality summaries and assisted-review provenance are included.
 - The local test suite passes 37 tests.
 - Three optional classifier alternatives were evaluated on development only.
 
@@ -17,13 +18,10 @@ The optional 54% development classifier result is not a replacement test score.
 
 1. Read LABEL_REVIEW.md: four specific annotation concerns need your judgment.
    Keep the frozen workbook intact; record any confirmed corrections separately.
-2. Fill artifacts/ratings/human_ratings.csv using evals/human_rating_guide.md.
-   Enter 1–5 for four quality dimensions and TRUE/FALSE for four safety flags.
-   Keep all IDs unchanged. Do not inspect predictions or judge scores first.
-3. Configure JUDGE_API_URL, JUDGE_API_KEY and JUDGE_MODEL_ID locally.
+2. Configure JUDGE_API_URL, JUDGE_API_KEY and JUDGE_MODEL_ID locally.
    Do not put API keys in chat, source files or commits.
 
-Once the 60 ratings are complete:
+The 60 ratings are already complete. Once the judge is configured:
 
 ```bash
 bash scripts/finish_submission.sh

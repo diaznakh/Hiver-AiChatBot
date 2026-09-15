@@ -4,14 +4,14 @@
 
 Read [REPORT.md](REPORT.md) for the measured report and five actual failure modes.
 All 200 golden rows are complete; the frozen 150-row test run is saved.
-Human reply ratings and judge agreement remain pending. Follow
+All 60 candidate reply ratings are integrated; judge agreement remains pending. Follow
 [FINISH_SUBMISSION.md](FINISH_SUBMISSION.md) for the remaining steps.
 The [60-reply rating CSV](artifacts/ratings/human_ratings.csv) is available directly
 in the repository. Do not inspect the prediction files before blind rating.
 
 `python3 -m evals.check_submission` checks missing evidence;
 `bash scripts/finish_submission.sh` completes the judge/agreement workflow after
-human ratings and judge credentials are supplied. See [LABEL_REVIEW.md](LABEL_REVIEW.md)
+judge credentials are supplied. The human ratings are already complete. See [LABEL_REVIEW.md](LABEL_REVIEW.md)
 for four semantic annotation concerns that schema checks cannot detect.
 
 This repository is the Hiver SDE Intern take-home solution. It uses real AmazonHelp conversations from the Customer Support on Twitter dataset.
@@ -95,7 +95,7 @@ The revised workbook is imported and its 50 development rows passed validation.
 See [annotation status](data/ANNOTATION_STATUS.md) and the measured
 [development review](artifacts/development/REVIEW.md). B2 achieved 46% intent
 accuracy and zero automatic coverage; no useful threshold was found. All 150 test rows are now complete. The held-out run is recorded in
-[official results](artifacts/official/README.md); blinded reply ratings remain pending.
+[official results](artifacts/official/README.md); candidate reply ratings are complete; judge agreement remains pending.
 
 To reproduce the development evaluation, run:
 
@@ -180,8 +180,8 @@ Agreement is reported with weighted kappa for groundedness, relevance, helpfulne
 The prototype, real-data subset, baseline implementations, evaluation workflows, shared anchored judge rubric, and report generator are implemented. The offline test workflow checks each code update; consult its result for the current commit. This is not yet a completed evaluation or submission.
 
 All 200 labels pass validation, and the 150-row held-out evaluation has run.
-B2 achieves 50% intent accuracy and zero automatic coverage. Human reply ratings
-and judge agreement remain pending; see [official results](artifacts/official/README.md).
+B2 achieves 50% intent accuracy and zero automatic coverage. Candidate reply ratings are complete;
+judge agreement remains pending; see [official results](artifacts/official/README.md).
 Completed golden labels do not need repeating.
 
 ## Repository structure

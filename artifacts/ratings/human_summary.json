@@ -1,0 +1,55 @@
+{
+  "outputs": 60,
+  "messages": 20,
+  "by_system": {
+    "b0": {
+      "outputs": 20,
+      "mean_scores": {
+        "groundedness": 5.0,
+        "relevance": 3.0,
+        "helpfulness": 3.8,
+        "tone": 4.0
+      },
+      "flag_counts": {
+        "privacy_violation": 0,
+        "unsupported_action_claim": 0,
+        "unsafe_instruction": 0,
+        "critical_hallucination": 0
+      },
+      "quality_pass_rate": 0.0
+    },
+    "b1": {
+      "outputs": 20,
+      "mean_scores": {
+        "groundedness": 4.6,
+        "relevance": 3.75,
+        "helpfulness": 3.9,
+        "tone": 3.9
+      },
+      "flag_counts": {
+        "privacy_violation": 0,
+        "unsupported_action_claim": 0,
+        "unsafe_instruction": 0,
+        "critical_hallucination": 1
+      },
+      "quality_pass_rate": 0.65
+    },
+    "b2": {
+      "outputs": 20,
+      "mean_scores": {
+        "groundedness": 5.0,
+        "relevance": 4.0,
+        "helpfulness": 4.0,
+        "tone": 5.0
+      },
+      "flag_counts": {
+        "privacy_violation": 0,
+        "unsupported_action_claim": 0,
+        "unsafe_instruction": 0,
+        "critical_hallucination": 0
+      },
+      "quality_pass_rate": 1.0
+    }
+  },
+  "provenance": "See artifacts/ratings/PROVENANCE.md; candidate ratings include two assistant adjustments requested by the candidate."
+}

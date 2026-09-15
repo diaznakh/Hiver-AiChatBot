@@ -117,7 +117,3 @@ To demonstrate how the BM25 retrieval grounds the response generation, here are 
 ## 6. What is misleading about my headline number?
 
 53.33% intent accuracy does not mean the complete agent is 53.33% reliable. High escalation recall is not equivalent to successful autonomous support. The agent automatically handled only 4.0% of test cases, and all 6/6 of those automatic cases were unsafe under the evaluation labels. Furthermore, reply quality has significantly different results depending on whether humans or the LLM judge evaluate it. Therefore, the headline metric alone is insufficient to claim production readiness.
-
-## 7. Improvement experiment and one more week
-
-Next: adjudicate flagged labels with a change log; audit clean training examples; add evidence-supported acknowledgement and clarification. A later test-informed model revision needs a fresh untouched holdout for an independent assessment.

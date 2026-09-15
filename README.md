@@ -1,5 +1,19 @@
 # AmazonHelp AI support agent
 
+## Submission snapshot
+
+Read [REPORT.md](REPORT.md) for the measured report and five actual failure modes.
+All 200 golden rows are complete; the frozen 150-row test run is saved.
+Human reply ratings and judge agreement remain pending. Follow
+[FINISH_SUBMISSION.md](FINISH_SUBMISSION.md) for the remaining steps.
+The [60-reply rating CSV](artifacts/ratings/human_ratings.csv) is available directly
+in the repository. Do not inspect the prediction files before blind rating.
+
+`python3 -m evals.check_submission` checks missing evidence;
+`bash scripts/finish_submission.sh` completes the judge/agreement workflow after
+human ratings and judge credentials are supplied. See [LABEL_REVIEW.md](LABEL_REVIEW.md)
+for four semantic annotation concerns that schema checks cannot detect.
+
 This repository is the Hiver SDE Intern take-home solution. It uses real AmazonHelp conversations from the Customer Support on Twitter dataset.
 
 For each incoming customer message, the agent returns exactly the three things required by the assignment:
@@ -61,7 +75,8 @@ The assignment requires 150-250 examples hand-labelled by the candidate. This re
 
 `data/golden_set.xlsx`
 
-Open it in Excel, Numbers, or LibreOffice. The `Method` tab explains the labels. In the `Golden Set` tab, complete only the yellow columns:
+The uploaded workbook's data tab is identified by its columns, even if renamed.
+See `evals/annotation_guide.md` for the labelling rules. The completed fields are:
 
 - `correct_intent`
 - `correct_route`

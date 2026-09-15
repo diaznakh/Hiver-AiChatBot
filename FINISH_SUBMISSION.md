@@ -1,48 +1,55 @@
 # Finish the submission
 
-## Completed development review
+## Already completed
 
-Zaid has completed the 50 development rows in the revised uploaded workbook.
-Do not repeat those rows. The revised workbook is imported and passed the source-field and label audit. See data/ANNOTATION_STATUS.md.
+- All 200 golden rows are populated and marked reviewed.
+- Original source fields pass the audit after exact spreadsheet ID normalization.
+- The frozen 150-row B0/B1/B2 evaluation is saved and reproduced.
+- REPORT.md contains measured results, five real failure modes and limitations.
+- Predictions and the 60-output blinded rating sheet are committed.
+- The local test suite passes 37 tests.
+- Three optional classifier alternatives were evaluated on development only.
 
-## Engineering workflow
+The agent still has 50% original test accuracy and zero automatic coverage.
+The optional 54% development classifier result is not a replacement test score.
 
-1. The revised workbook is already at data/golden_set.xlsx; preserve its completed dev labels.
-2. Run `bash scripts/develop.sh`. It trains the classifier, runs tests, calibrates
-   on dev only, and writes development predictions, metrics and input hashes.
-3. Inspect artifacts/development/calibration.json. Zero automatic coverage is a
-   failed search for useful thresholds, not successful safety calibration.
-4. Freeze the selected implementation and configuration before the test run.
-5. After the test labels are complete, run `bash scripts/evaluate.sh`.
-6. Use the README commands to generate the 60-output blinded rating sheet.
-7. After human ratings, run the configured judge, score agreement, and generate
-   REPORT_RESULTS.md. Incorporate actual measured failures into REPORT.md.
+## Remaining human work
 
-## Human input still required
+1. Read LABEL_REVIEW.md: four specific annotation concerns need your judgment.
+   Keep the frozen workbook intact; record any confirmed corrections separately.
+2. Fill artifacts/ratings/human_ratings.csv using evals/human_rating_guide.md.
+   Enter 1–5 for four quality dimensions and TRUE/FALSE for four safety flags.
+   Keep all IDs unchanged. Do not inspect predictions or judge scores first.
+3. Configure JUDGE_API_URL, JUDGE_API_KEY and JUDGE_MODEL_ID locally.
+   Do not put API keys in chat, source files or commits.
 
-- Label the 150 held-out test rows using the Method tab.
-- Rate the 60 blinded replies before inspecting judge ratings.
+Once the 60 ratings are complete:
 
-A compatible judge endpoint and model must also be configured locally. No live
-judge results are available yet. Keep API credentials out of committed files.
+```bash
+bash scripts/finish_submission.sh
+```
 
-## Limits of the current prototype
+This validates the exact rating set, calls the judge if no judge file exists,
+calculates agreement and generates artifacts/official/REPORT_RESULTS.md.
+It refuses incomplete human ratings and never fills them automatically.
+If a judge run stops halfway, preserve the partial file for diagnosis and use
+a new output path with evals.run_judge; do not treat partial agreement as complete.
 
-- Offline guidance uses a narrow allowlist conditioned on historical replies and
-  customer symptoms. It does not know current policy or account status.
-- Handoffs explain that human support needs to review the request; they do not
-  claim that a check or an actual handoff has happened.
-- Software-update matching excludes phrases such as "keep us updated."
-- Feature questions do not receive restart/update advice merely because a
-  retrieved response contains those words.
-- The saved artifacts/latest run is an older weak-label diagnostic. It predates
-  these changes and must not be used as current development or final results.
-- HLD.md and LLD.md describe proposed production features; they are not evidence
-  that all such features exist. The prototype does not send customer messages.
+Check evidence status at any time:
 
-## Verification status
+```bash
+python3 -m evals.check_submission
+```
 
-The added GitHub Actions workflow runs compilation and the offline test suite.
-The evaluated commit passed all 33 tests. Development metrics are recorded in
-artifacts/development/REVIEW.md. No final test evaluation, judge agreement, or
-successful threshold calibration is claimed.
+After agreement is available, incorporate its measured reply-quality section
+into REPORT.md and remove pending statements only when supported.
+
+## Submit
+
+Use the form linked in the assignment. Include the repository link and REPORT.md.
+The brief allows a public repo or a private repo with evaluator access. This
+repository remains private; verify the evaluators have access before submitting.
+No submission has been sent.
+
+The task permits AI coding assistants. Be prepared to explain the classifier,
+BM25 retrieval, guardrails, leakage checks and evaluation limitations live.

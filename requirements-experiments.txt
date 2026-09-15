@@ -1,0 +1,2 @@
+# Optional development comparison only; core agent has no external dependencies.
+scikit-learn==1.8.0

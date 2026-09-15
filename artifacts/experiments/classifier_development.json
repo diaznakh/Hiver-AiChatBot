@@ -1,0 +1,21 @@
+{
+  "split": "dev",
+  "examples": 50,
+  "training_examples": 5600,
+  "sklearn_version": "1.8.0",
+  "results": {
+    "word_tfidf_logistic": {
+      "accuracy": 0.54,
+      "macro_f1": 0.4825796850998464
+    },
+    "word_tfidf_svm": {
+      "accuracy": 0.54,
+      "macro_f1": 0.46213189223057644
+    },
+    "character_tfidf_svm": {
+      "accuracy": 0.52,
+      "macro_f1": 0.44026203435533806
+    }
+  },
+  "warning": "Exploratory development comparison on weak training labels. No test evaluation or production promotion. SVM scores are not calibrated routing probabilities."
+}

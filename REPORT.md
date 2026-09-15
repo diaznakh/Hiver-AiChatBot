@@ -1,74 +1,144 @@
-# Report: AmazonHelp AI support agent
+# AmazonHelp support agent — measured report
 
-**Evaluation status:** Prototype and evaluation workflow implemented; submission evidence incomplete. The 50 development rows are reviewed and evaluated; final headline results remain blank until the 150 held-out test rows are reviewed. Diagnostic weak-label scores are intentionally excluded.
+**Status:** runnable prototype and frozen evaluation completed. Human reply ratings
+and LLM-judge agreement are pending. This is not yet a complete submission or a
+production-ready agent.
 
 ## 1. Problem framing
 
-The agent handles AmazonHelp messages from the Customer Support on Twitter dataset. A good result has three properties: the intent is useful, the reply is supported by similar historical AmazonHelp conversations, and account-specific or unsafe requests are escalated with an understandable reason.
+For each incoming AmazonHelp message, the agent predicts one of eight intents,
+drafts a historically grounded reply and recommends AUTO_HANDLE or ESCALATE with
+a reason. A good response identifies the request, supports its claims, protects
+customer data and reserves account actions for humans. The implementation does
+not send tweets, look up accounts, issue refunds, cancel orders, verify current
+policy or deliver actual human handoffs.
 
-I chose not to build tweet delivery, account lookup, refunds, cancellation execution, or current-policy lookup. `AUTO_HANDLE` is a recommendation only. Historical responses show how AmazonHelp replied in 2017; they do not prove current policy or the status of a customer's account.
+## 2. Data and annotation
 
-## 2. Data and sampling
+The source is Thought Vector's Customer Support on Twitter, named in the
+assignment. The audit found 2,811,774 records, 169,840 AmazonHelp replies,
+154,976 direct customer/brand pairs and 86,643 conversation groups. The repository
+bundles 5,600 redacted training/retrieval cases.
 
-- Source: Customer Support on Twitter (`twcs.csv`)
-- Full CSV records: 2,811,774
-- AmazonHelp replies: 169,840
-- Direct customer-brand pairs: 154,976
-- Conversation groups: 86,643
-- Exact duplicate customer messages removed: 3,691
-- Eligible partitions: 107,099 train, 22,150 development, and 22,036 test
-- Bundled training/retrieval subset: 5,600 balanced, redacted training cases
-- Golden set: 50 development and 150 locked test examples
+Conversation roots were split chronologically and exact duplicate customer
+messages removed across partitions. The golden workbook has 50 development and
+150 test examples. Each split samples 70% from a non-challenge pool and 30% from a
+challenge pool; this is not a natural-traffic estimate. Golden target and available
+history tweet IDs are excluded from training.
 
-Whole conversation roots were ordered by time and assigned 70/15/15 to train, development, and test. Exact message duplicates were removed globally. Each golden split contains 70% random cases and 30% challenge cases. The training index contains no golden target or available-history tweet IDs.
+Zaid Khan marked all 200 rows reviewed. AI suggestions and review guidance were
+used during development; no independent annotation process is claimed. Schema
+validation proves required fields and source identity, not label correctness.
+The focused concerns in LABEL_REVIEW.md remain pending human adjudication.
+No golden labels were changed after observing test results.
 
-The classifier uses weak heuristic labels on the separate training subset. Those labels do not count as the hand-labelled golden set.
+## 3. Systems and development
 
-## 3. Systems compared
+| System | Intent | Reply and routing |
+| --- | --- | --- |
+| B0, trivial | Constant delivery_tracking | Fixed acknowledgement; always escalate |
+| B1, simple | Word-count Naive Bayes, weak training labels | Nearest BM25 reply; keyword risk rule |
+| B2, proposed | Same classifier | Top-five intent-filtered BM25, narrow supported guidance, deterministic guardrails |
 
-| System | Description |
-| --- | --- |
-| B0 | Constant delivery_tracking intent, fixed acknowledgement, always escalate |
-| B1 | Naive Bayes intent classifier, nearest BM25 historical reply, simple risk rule |
-| B2 | Same classifier, top-five BM25 evidence, response-conditioned allowlisted guidance, deterministic validation and escalation |
+B1 and B2 share a classifier to isolate drafting/routing changes. Offline B2 is
+an auditable guidance selector, not a live generative LLM. The optional HTTP
+drafting adapter was not used.
 
-Using the same classifier for B1 and B2 isolates the effect of evidence packaging, drafting, and routing rather than changing every component at once.
+On dev, B2 had 46% accuracy and 0.359604 macro-F1. All 80 calibration pairs
+produced zero automatic replies. All nine gold-auto dev examples stopped at
+insufficient supported evidence. Eight involve feedback, suggestions,
+acknowledgement or self-resolution; one involves video stuttering. The narrow
+allowlist covers tracking, delivery-location checks, restarts and updates, so
+it misses many ordinary response needs. Null thresholds disable automatic
+handling; calibration did not establish safety.
 
-## 4. Results
+## 4. Frozen held-out results
 
-Development-only results: B2 intent accuracy 46%, macro-F1 0.359604, automatic
-coverage 0/50. No useful calibration threshold was found. B1 automatically
-handled 41/50, including 32 cases labelled ESCALATE. These results expose poor
-classification and over-escalation in B2; they are not held-out headline scores.
-See artifacts/development/REVIEW.md for denominators and the reproducible run.
+Evaluated commit: f1be66b440a825d9bdf8430332af9ee31731e499.
+Workbook SHA256: a3671a0789aad8d00b3aae622260233b772efe35be257af6d9f09ef82f951ba3.
+All non-latency metrics reproduced exactly on 15 September 2026. Reproduced
+predictions and original summary metrics are included in artifacts/official.
 
+| System | Accuracy | Macro-F1 | Auto coverage | Unsafe auto by route label | Escalation recall |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| B0 | 52.67% | 0.086245 | 0/150 | N/A: 0 automatic | 100% |
+| B1 | 50.00% | 0.288591 | 122/150 | 120/122 | 18.92% |
+| B2 | 50.00% | 0.288591 | 0/150 | N/A: 0 automatic | 100% |
 
-Run `bash scripts/evaluate.sh` after completing `data/golden_set.xlsx`. The command generates the measured table below in `artifacts/official/REPORT_RESULTS.md`.
+B2 classified 75/150 correctly and escalated both gold-auto cases. B0's higher
+accuracy reflects 79 delivery-labelled examples. B2's broader class coverage
+raises macro-F1 but does not establish useful automation. Its original p95
+latency was 9.402 ms for local offline inference, not production or live-LLM latency.
 
-| System | Intent macro-F1 | Auto coverage | Unsafe auto | Escalation recall |
-| --- | ---: | ---: | ---: | ---: |
-| B0 | Pending human labels | Pending | Pending | Pending |
-| B1 | Pending human labels | Pending | Pending | Pending |
-| B2 | Pending human labels | Pending | Pending | Pending |
+Test labels contain 148 ESCALATE and two AUTO_HANDLE cases, with no order_change
+examples. Macro-F1 uses all eight classes and assigns zero to the unsupported
+class. Reply quality and judge-human agreement remain **unmeasured**. The blind
+rating sheet contains 60 outputs: 20 messages times three systems. Shared 1–5
+anchors assess groundedness, relevance, helpfulness and tone; four binary safety
+flags override high scores. Weighted/binary kappa, raw agreement, MAE and
+per-system quality summaries are implemented but require real ratings.
 
-Reply quality is evaluated blindly on 60 outputs using human and LLM ratings for groundedness, relevance, helpfulness, tone, and four safety flags. Weighted and binary kappa measure judge-human agreement.
+## 5. Five observed failure modes
 
-## 5. Expected failure modes to verify on the locked test
+These are representative observed problems, not five ranked, mutually exclusive
+categories. Predictions contain the full messages, drafts and evidence IDs.
 
-These hypotheses come from inspecting real sampled cases. They are not presented as measured test findings.
+1. **Unnecessary social-message handoff.** amazon_test_003 jokes about a helpful
+   support call: gold other_unclear/AUTO_HANDLE, predicted order_change/ESCALATE.
+   Its account-review draft is inappropriate. First evidence: amazon_1119594.
+   Missing acknowledgement behaviour and order vocabulary plausibly contribute.
+2. **Mixed-intent vocabulary beats the requested action.** amazon_test_012 asks
+   to return duplicate Kindle books: gold return_refund, predicted digital_service.
+   First evidence: amazon_441022. The word model may over-weight Kindle relative
+   to the return request; cleaner task-oriented training is a hypothesis to test.
+3. **Non-Latin token loss.** amazon_test_017 is Japanese: gold other_unclear,
+   predicted account_prime, no evidence. The ASCII tokenizer can discard all
+   useful words. Unicode-aware or multilingual representations need validation.
+4. **Intent filtering compounds classification errors.** amazon_test_134 asks
+   for delivery but mentions using a return button. It is classified return_refund
+   and retrieves that intent's cases, beginning with amazon_1319857. Compare
+   unfiltered retrieval on development misses rather than only lowering thresholds.
+5. **Evaluation-label inconsistency.** amazon_test_034 asks to cancel Prime but
+   is labelled delivery_tracking; B2 predicts account_prime. amazon_test_143 has
+   a damaged butter dish but is labelled digital_service; B2 predicts product_issue.
+   These conflict with the taxonomy and need human adjudication. Original labels
+   and scores remain unchanged.
 
-1. **Very short or context-free requests.** Example: `[HANDLE] how do I make this stop [URL]`. The classifier lacks enough information; escalation is safer than a confident guess.
-2. **Mixed intent messages.** Example: broken earphones followed by an exchange-or-refund request. A single primary label hides the product and refund combination.
-3. **Unsupported languages.** Several Japanese and Spanish messages enter `other_unclear`. Language detection or multilingual representations may improve classification.
-4. **Account-specific delivery cases.** “Delivered but not received” resembles ordinary tracking text but needs an account investigation. Keyword confidence alone can route it unsafely.
-5. **Weak historical outcomes.** Many old brand replies only direct the customer to a private channel. They establish tone and handoff behavior, not that the issue was resolved.
-
-After the locked evaluation, replace these hypotheses with the five highest-frequency observed modes and include representative predictions, retrieved evidence, and correction experiments.
+B2 produced only two distinct drafts across 150 outputs. Two examples had no
+retrieved evidence. INSUFFICIENT_EVIDENCE appears on 134 outputs; reason counts
+overlap. Retrieved IDs alone do not prove helpfulness or semantic support.
+The suspected account-compromise message amazon_test_104 is also marked
+AUTO_HANDLE in the golden set and merits routing-label review.
 
 ## 6. What is misleading about my headline number?
 
-Intent macro-F1 does not measure reply quality or routing safety. An always-escalate system can produce zero unsafe automatic replies while automating nothing, so safety must be reported with coverage and its denominator. The golden set deliberately oversamples difficult cases and is not a natural-traffic estimate. The classifier is trained on weak labels. Historical replies may be incomplete handoffs and may not reflect current policy. A zero observed unsafe count is not proof of zero risk. LLM-judge results are secondary unless agreement with blinded human ratings is adequate.
+50% accuracy measures agreement with one reviewed, imperfect answer key.
+Macro-F1 ignores reply quality and depends on the eight-class denominator.
+The challenge mixture, language coverage and extreme route imbalance limit
+generalization. Zero unsafe B2 replies at zero coverage is not safety evidence.
+Historical 2017 replies are not current policy or proof of resolution. Naive
+Bayes probabilities are not reliable confidence calibration. Passing software
+tests establishes tested code properties, not product quality.
 
-## 7. What I would do with one more week
+## 7. Improvement experiment and one more week
 
-I would inspect the locked retrieval misses, add multilingual handling, label a small clean classifier-training set, compare hybrid retrieval only where BM25 fails, add approved current knowledge with validity dates, expand blind human ratings, and run a larger shadow evaluation before enabling any delivery action.
+A bounded follow-up compared three TF-IDF classifiers on dev only, using the
+same 5,600 weak training labels. Word TF-IDF logistic regression reached 54%
+accuracy / 0.482580 macro-F1; word SVM 54% / 0.462132; character SVM
+52% / 0.440262. This is exploratory tuning evidence. No candidate replaced
+the frozen agent and no post-hoc test score is claimed for them.
+
+Next: adjudicate flagged labels with a change log; audit clean training examples;
+add evidence-supported acknowledgement and clarification; compare retrieval
+without hard intent filtering. Complete human ratings and the configured judge
+run, then report actual agreement. A later test-informed model revision needs
+a fresh untouched holdout for an independent assessment.
+
+## Reproduce
+
+Python 3.11+, no packages or API keys for the core: `bash scripts/evaluate.sh`.
+The bundled subset reproduced all systems in seconds locally. To finish reply
+evaluation, fill the saved rating CSV, configure JUDGE_API_URL, JUDGE_API_KEY and
+JUDGE_MODEL_ID locally, then run `bash scripts/finish_submission.sh`.
+It refuses incomplete human ratings. The optional classifier comparison needs
+scikit-learn 1.8.0 and runs with `python3 -m evals.compare_development`.

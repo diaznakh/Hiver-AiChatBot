@@ -1,0 +1,10 @@
+{
+  "reviewer": "AI assistant, at candidate request",
+  "status": "Post-test supplemental review; not candidate-authored ground truth or an independent test",
+  "changes": [
+    {"example_id": "amazon_test_011", "primary_intent": "delivery_tracking", "expected_route": "ESCALATE", "reason": "The underlying request concerns a lost parcel and next steps; no digital service is involved. Human support must check shipment and replacement details."},
+    {"example_id": "amazon_test_034", "primary_intent": "account_prime", "expected_route": "ESCALATE", "reason": "Prime membership cancellation belongs to account_prime. No verified settings instructions are available in this prototype."},
+    {"example_id": "amazon_test_104", "primary_intent": "account_prime", "expected_route": "ESCALATE", "reason": "Unrecognized orders and reviews suggest an account-security concern. Human support must assess it; the message is not positive feedback and does not prove compromise."},
+    {"example_id": "amazon_test_143", "primary_intent": "product_issue", "expected_route": "ESCALATE", "reason": "Possible broken glass in a physical butter dish is a product issue; video is incidental. Human support must assess replacement or refund options."}
+  ]
+}

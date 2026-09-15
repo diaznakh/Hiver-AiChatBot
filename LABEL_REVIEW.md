@@ -1,5 +1,27 @@
 # Focused annotation review
 
+## Completed supplemental review
+
+At the candidate's request, the assistant reviewed all four concerns against
+the taxonomy and actual customer messages. Decisions and reasons are saved in
+`data/labels/review_supplement.json`. This completes the AI review, not a new
+human annotation pass. The original human labels remain the official results.
+
+| Example | Supplemental intent | Supplemental route |
+| --- | --- | --- |
+| amazon_test_011 | delivery_tracking | ESCALATE |
+| amazon_test_034 | account_prime | ESCALATE |
+| amazon_test_104 | account_prime | ESCALATE |
+| amazon_test_143 | product_issue | ESCALATE |
+
+`python3 -m evals.review_sensitivity` reproduces the comparison without
+changing the workbook, predictions or human reply ratings. B2 accuracy changes
+from 50.00% to 51.33% and macro-F1 from 0.288591 to 0.317908. Automatic coverage
+remains zero. B1 unsafe auto becomes 121/122 versus 120/122. These are post-test
+label-sensitivity results, not an independently improved model score.
+
+## Original concerns and review rationale
+
 These are AI review suggestions, not replacements for human ground truth.
 The original XLSX and frozen results remain unchanged. Schema validation proves
 that cells are complete; it does not prove that their meanings are correct.

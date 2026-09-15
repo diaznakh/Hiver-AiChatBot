@@ -29,7 +29,8 @@ history tweet IDs are excluded from training.
 Zaid Khan marked all 200 rows reviewed. AI suggestions and review guidance were
 used during development; no independent annotation process is claimed. Schema
 validation proves required fields and source identity, not label correctness.
-The focused concerns in LABEL_REVIEW.md remain pending human adjudication.
+The four concerns have an AI-reviewed supplement in LABEL_REVIEW.md;
+it does not replace the original human labels.
 No golden labels were changed after observing test results.
 
 ## 3. Systems and development
@@ -133,6 +134,12 @@ Bayes probabilities are not reliable confidence calibration. Passing software
 tests establishes tested code properties, not product quality.
 
 ## 7. Improvement experiment and one more week
+
+A post-test AI review of four label concerns is saved separately. Applying
+its intent/route suggestions to frozen predictions changes B2 accuracy from
+50.00% to 51.33% and macro-F1 from 0.288591 to 0.317908; coverage stays zero.
+B1 unsafe auto increases to 121/122. This sensitivity analysis is not a new
+independent test or a model improvement. Original headline scores remain intact.
 
 A bounded follow-up compared three TF-IDF classifiers on dev only, using the
 same 5,600 weak training labels. Word TF-IDF logistic regression reached 54%

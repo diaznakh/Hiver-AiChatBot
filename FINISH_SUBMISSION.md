@@ -16,10 +16,21 @@ The optional 54% development classifier result is not a replacement test score.
 
 ## Remaining human work
 
-1. Read LABEL_REVIEW.md: four specific annotation concerns need your judgment.
-   Keep the frozen workbook intact; record any confirmed corrections separately.
-2. Configure JUDGE_API_URL, JUDGE_API_KEY and JUDGE_MODEL_ID locally.
-   Do not put API keys in chat, source files or commits.
+The four concerns now have an AI-reviewed supplement and a reproducible score
+comparison in LABEL_REVIEW.md. Original human labels remain the official results.
+
+Configure a compatible judge locally using the interactive command below.
+It asks for the HTTPS chat-completions endpoint, model ID and a hidden API key;
+credentials are passed to the process and are not written to files.
+
+```bash
+git pull --ff-only
+python3 scripts/finish_with_judge.py
+```
+
+This is the only remaining evaluation step that needs access unavailable to
+the assistant. The provider receives the sampled messages/replies/evidence
+and may charge API usage. Do not paste your API key into chat.
 
 The 60 ratings are already complete. Once the judge is configured:
 

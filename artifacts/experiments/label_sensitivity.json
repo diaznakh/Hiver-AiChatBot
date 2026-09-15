@@ -1,0 +1,54 @@
+{
+  "status": "Post-test supplemental review; not candidate-authored ground truth or an independent test",
+  "note": "Only intent and route sensitivity. Reply reference criteria and human ratings are unchanged. This is not a new model evaluation.",
+  "results": {
+    "b0": {
+      "original": {
+        "intent_macro_f1": 0.086245,
+        "intent_accuracy": 0.526667,
+        "auto_count": 0,
+        "unsafe_auto_count_routing_label": 0,
+        "escalation_recall": 1.0
+      },
+      "supplemental": {
+        "intent_macro_f1": 0.086245,
+        "intent_accuracy": 0.526667,
+        "auto_count": 0,
+        "unsafe_auto_count_routing_label": 0,
+        "escalation_recall": 1.0
+      }
+    },
+    "b1": {
+      "original": {
+        "intent_macro_f1": 0.288591,
+        "intent_accuracy": 0.5,
+        "auto_count": 122,
+        "unsafe_auto_count_routing_label": 120,
+        "escalation_recall": 0.189189
+      },
+      "supplemental": {
+        "intent_macro_f1": 0.317908,
+        "intent_accuracy": 0.513333,
+        "auto_count": 122,
+        "unsafe_auto_count_routing_label": 121,
+        "escalation_recall": 0.187919
+      }
+    },
+    "b2": {
+      "original": {
+        "intent_macro_f1": 0.288591,
+        "intent_accuracy": 0.5,
+        "auto_count": 0,
+        "unsafe_auto_count_routing_label": 0,
+        "escalation_recall": 1.0
+      },
+      "supplemental": {
+        "intent_macro_f1": 0.317908,
+        "intent_accuracy": 0.513333,
+        "auto_count": 0,
+        "unsafe_auto_count_routing_label": 0,
+        "escalation_recall": 1.0
+      }
+    }
+  }
+}

@@ -6,7 +6,7 @@ import unittest
 import urllib.error
 from pathlib import Path
 from unittest.mock import patch
-from evals.run_judge import call_judge, main
+from evals.run_judge import call_judge, main, validated_judge
 
 
 ENV = {'JUDGE_API_URL': 'https://example.invalid/chat/completions', 'JUDGE_API_KEY': 'test-secret', 'JUDGE_MODEL_ID': 'test-model'}
@@ -17,6 +17,22 @@ RATING = dict(groundedness=4, relevance=4, helpfulness=4, tone=4,
 
 
 class JudgeTransportTests(unittest.TestCase):
+    def test_invalid_evidence_is_retried_not_removed(self):
+        bad = {**RATING, 'evidence_ids': ['invented']}
+        with patch('evals.run_judge.call_judge', side_effect=[bad, RATING]) as judge, patch('builtins.print'):
+            rating, errors = validated_judge('unchanged prompt', set())
+            self.assertEqual(rating, RATING)
+            self.assertEqual(len(errors), 1)
+            self.assertEqual(bad['evidence_ids'], ['invented'])
+            self.assertEqual(judge.call_count, 2)
+            self.assertTrue(all(c.args == ('unchanged prompt',) for c in judge.call_args_list))
+
+    def test_repeated_invalid_evidence_stops(self):
+        with patch('evals.run_judge.call_judge', return_value={**RATING, 'evidence_ids': ['invented']}) as judge, patch('builtins.print'):
+            with self.assertRaisesRegex(RuntimeError, 'No invalid rating was saved'):
+                validated_judge('case', set())
+            self.assertEqual(judge.call_count, 3)
+
     @patch.dict(os.environ, ENV)
     def test_error_details_redact_key_and_include_user_message(self):
         error = urllib.error.HTTPError(ENV['JUDGE_API_URL'], 400, 'Bad request', {}, io.BytesIO(b'Invalid request test-secret'))

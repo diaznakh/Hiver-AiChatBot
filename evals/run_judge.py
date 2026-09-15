@@ -63,6 +63,23 @@ def call_judge(prompt: str) -> dict:
     return json.loads(payload["choices"][0]["message"]["content"])
 
 
+def validated_judge(prompt: str, allowed_ids: set[str]) -> tuple[dict, list[str]]:
+    """Retry malformed ratings, never alter scores or silently remove citations."""
+    errors = []
+    for attempt in range(3):
+        try:
+            rating = call_judge(prompt)
+            if not isinstance(rating, dict):
+                raise ValueError('judge rating must be a JSON object')
+            validate_rating(rating, allowed_ids)
+            return rating, errors
+        except (ValueError, KeyError, TypeError) as exc:
+            reason = 'judge response was not valid JSON' if isinstance(exc, json.JSONDecodeError) else str(exc)
+            errors.append(reason)
+            print(f'Invalid judge response ({attempt + 1}/3): {reason}', flush=True)
+    raise RuntimeError('Judge returned invalid ratings 3 times. No invalid rating was saved; previous ratings are preserved. Rerun to resume.')
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Blindly judge saved system outputs")
     parser.add_argument("--examples", required=True)
@@ -123,10 +140,9 @@ def main() -> None:
                     pass
             prompt = build_prompt(examples[row["example_id"]], row["prediction"], evidence)
             print(f'Rating {len(saved) + 1}/{len(rows)}...', flush=True)
-            rating = call_judge(prompt)
             allowed_ids = {case["case_id"] for case in evidence}
-            validate_rating(rating, allowed_ids)
-            handle.write(json.dumps({"output_id": identifier, "rating": rating, "model": os.environ["JUDGE_MODEL_ID"], "rubric_version": "v2", "seed": args.seed, "prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest()}) + "\n")
+            rating, validation_errors = validated_judge(prompt, allowed_ids)
+            handle.write(json.dumps({"output_id": identifier, "rating": rating, "model": os.environ["JUDGE_MODEL_ID"], "rubric_version": "v2", "seed": args.seed, "prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest(), "validation_retry_errors": validation_errors}) + "\n")
             handle.flush()
             saved[identifier] = True
             print(f'Rated {len(saved)}/{len(rows)}', flush=True)

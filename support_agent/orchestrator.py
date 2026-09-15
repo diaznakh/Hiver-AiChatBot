@@ -73,7 +73,7 @@ class SupportOrchestrator:
                     "model_attempts": budget.attempts,
                 },
             )
-        route, reason_codes = self.guardrails.route(intent, evidence, draft)
+        route, reason_codes = self.guardrails.route(clean_message, intent, evidence, draft)
         return AgentResult(
             intent=intent.label,
             intent_confidence=intent.confidence,

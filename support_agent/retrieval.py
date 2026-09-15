@@ -43,8 +43,6 @@ class BM25Repository:
         scored: list[tuple[float, EvidenceCase]] = []
         n = len(self.documents)
         for case, doc in zip(self.cases, self.documents):
-            if intent and case.intent != intent:
-                continue
             tf = Counter(doc)
             score = 0.0
             for term in q:
@@ -54,6 +52,9 @@ class BM25Repository:
                 numerator = tf[term] * 2.5
                 denominator = tf[term] + 1.5 * (1 - 0.75 + 0.75 * len(doc) / self.avgdl)
                 score += idf * numerator / denominator
+            # Soft intent boost: prefer same-intent cases but don't exclude others
+            if intent and case.intent == intent:
+                score *= 1.5
             if score > 0:
                 scored.append((score, case))
         scored.sort(key=lambda pair: (-pair[0], pair[1].case_id))

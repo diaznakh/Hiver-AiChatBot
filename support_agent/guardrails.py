@@ -7,9 +7,12 @@ from .contracts import DraftResult, EvidenceCase, IntentPrediction, Route
 from .redact import redact_text
 
 SENSITIVE_REQUEST = re.compile(r"\b(password|passcode|otp|one[- ]time password|cvv|pin)\b", re.I)
-ACCOUNT_ACTION = re.compile(
-    r"\b(refund(?:ed)?|cancel(?:led)?|unlock|charg(?:e|ed|eback)|change (?:my )?(?:address|email)|account|"
-    r"marked (?:as )?delivered|delivered but|missing|stolen|guarantee|driver|damaged|broken|wrong item)\b",
+ACCOUNT_ACTION_HARD = re.compile(
+    r"\b(refund(?:ed)?|cancel(?:led)?|unlock|charg(?:e|ed|eback)|change (?:my )?(?:address|email))\b",
+    re.I,
+)
+ACCOUNT_ACTION_SOFT = re.compile(
+    r"\b(account|marked (?:as )?delivered|delivered but|missing|stolen|guarantee|driver|damaged|broken|wrong item|preorder(?:ed)?|chucked|thrown|not arrive|horrible|terrible|awful|worst|disappointing|sick of|unacceptable|ridiculous)\b",
     re.I,
 )
 COMPLETED_ACTION = re.compile(
@@ -37,6 +40,7 @@ REASON_TEXT = {
     "OUTPUT_VALIDATION_FAILED": "The draft did not pass the safety and grounding checks.",
     "MODEL_TIMEOUT": "The drafting service was unavailable, so the request was routed safely.",
     "TOOL_UNAVAILABLE": "Historical evidence could not be retrieved, so the request was routed safely.",
+    "BUDGET_EXCEEDED": "The drafting budget was exceeded, so the request was routed safely.",
     "LOW_RISK_GROUNDED": "The request is low-risk and the reply is supported by relevant historical evidence.",
 }
 
@@ -50,7 +54,7 @@ class GuardrailEngine:
         codes = []
         if SENSITIVE_REQUEST.search(message):
             codes.append("SECURITY_RISK")
-        if ACCOUNT_ACTION.search(message):
+        if ACCOUNT_ACTION_HARD.search(message):
             codes.append("ACCOUNT_ACTION_REQUIRED")
         return CheckResult(not codes, tuple(codes), critical="SECURITY_RISK" in codes)
 
@@ -73,12 +77,13 @@ class GuardrailEngine:
 
     def route(
         self,
+        message: str,
         intent: IntentPrediction,
         evidence: list[EvidenceCase],
         draft: DraftResult,
     ) -> tuple[Route, tuple[str, ...]]:
         codes = []
-        if draft.needs_human:
+        if draft.needs_human or ACCOUNT_ACTION_SOFT.search(message):
             codes.append("ACCOUNT_ACTION_REQUIRED")
         if evidence and evidence[0].evidence_type != "actionable_guidance":
             codes.append("INSUFFICIENT_EVIDENCE")
@@ -103,6 +108,7 @@ def primary_reason(codes: tuple[str, ...]) -> str:
         "INSUFFICIENT_EVIDENCE",
         "TOOL_UNAVAILABLE",
         "MODEL_TIMEOUT",
+        "BUDGET_EXCEEDED",
         "OUTPUT_VALIDATION_FAILED",
         "LOW_RISK_GROUNDED",
     ]

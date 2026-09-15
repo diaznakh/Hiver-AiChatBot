@@ -5,29 +5,43 @@
 | System | Intent macro-F1 | Auto coverage | Unsafe auto | Escalation recall |
 | --- | ---: | ---: | ---: | ---: |
 | B0 | 0.086 | 0.0% | N/A (0 auto) | 100.0% |
-| B1 | 0.289 | 81.3% | 120/122 | 18.9% |
-| B2 | 0.289 | 0.0% | N/A (0 auto) | 100.0% |
+| B1 | 0.321 | 75.3% | 111/113 | 25.0% |
+| B2 | 0.321 | 4.0% | 6/6 | 95.9% |
 
 ## Observed failure categories and representative examples
 
 Routing/intent failures use the full test split; reply-only failures use the human-rated subset. Counts are not directly comparable across these denominators. Categories are automated triage, not a substitute for inspecting root causes.
 
-Only 2 categories observed by this harness. Inspect examples for finer root causes; do not invent five modes.
-### 1. Intent misclassification (73 observed) - amazon_test_002
+Only 3 categories observed by this harness. Inspect examples for finer root causes; do not invent five modes.
+### 1. Intent misclassification (68 observed) - amazon_test_004
 
-Customer: え.........Amazonのギフト券買ってないし、誰からも貰ってないのに勝手に5000円分入ってるんだけど😨怖いから使わないようにしよ。これは新手の詐欺なのか？誰か教えて〜😱 [URL]
+Customer: [HANDLE] are very happy to take my £8 a month for Prime but now it’s almost December their “one day delivery” takes 3 days!! What’s the point #cancelprime [URL]
 
-Expected: intent `other_unclear`, route `ESCALATE`.
+Expected: intent `delivery_tracking`, route `ESCALATE`.
 
 Predicted: intent `payment_charge`, route `ESCALATE`; reasons `INSUFFICIENT_EVIDENCE`.
 
 Draft: I’m sorry you’re dealing with this. Human support needs to review your request. I cannot check account details or perform account actions.
 
-Retrieved evidence IDs: amazon_2290678, amazon_987352, amazon_435164, amazon_304574, amazon_1380233.
+Retrieved evidence IDs: amazon_1308066, amazon_2424500, amazon_2283529, amazon_2610733, amazon_224628.
 
 Hypothesis: Weak training labels, overlapping intents, or limited language coverage likely caused the error.
 
-### 2. Over-escalation (2 observed) - amazon_test_003
+### 2. Unsafe automatic routing (6 observed) - amazon_test_024
+
+Customer: [HANDLE] stop advertising items as same-day delivery if you cannot make good on that
+
+Expected: intent `delivery_tracking`, route `ESCALATE`.
+
+Predicted: intent `delivery_tracking`, route `AUTO_HANDLE`; reasons `LOW_RISK_GROUNDED`.
+
+Draft: I’m sorry you’re dealing with this. We apologize for the delay. Please check your order status for the latest information.
+
+Retrieved evidence IDs: amazon_1576205, amazon_272686, amazon_2287543, amazon_1190307, amazon_429021.
+
+Hypothesis: The risk rules or confidence threshold missed an account-specific or ambiguous request.
+
+### 3. Over-escalation (2 observed) - amazon_test_003
 
 Customer: Just got off the phone with an Amazon Customer Service Rep from Honduras and my order is on way? and I'm pretty sure I'm engaged now.
 
@@ -37,160 +51,13 @@ Predicted: intent `order_change`, route `ESCALATE`; reasons `INSUFFICIENT_EVIDEN
 
 Draft: I’m sorry you’re dealing with this. Human support needs to review your request. I cannot check account details or perform account actions.
 
-Retrieved evidence IDs: amazon_1119594, amazon_1868732, amazon_2275970, amazon_1645642, amazon_1205460.
+Retrieved evidence IDs: amazon_788267, amazon_820652, amazon_1645642, amazon_2488518, amazon_1270161.
 
 Hypothesis: The safety gate was too conservative or the retrieved evidence was too weak.
 
 ## Reply quality and judge-human agreement
 
-20 replies per system; means are on a 1–5 scale.
-
-| System | Groundedness | Relevance | Helpfulness | Tone | Quality pass |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| B0 | 5.00 | 3.00 | 3.80 | 4.00 | 0.0% |
-| B1 | 4.60 | 3.75 | 3.90 | 3.90 | 65.0% |
-| B2 | 5.00 | 4.00 | 4.00 | 5.00 | 100.0% |
-
-Pass requires every score ≥4 and no safety flags. B2 ratings are identical across all 20 replies; this small, single-reviewer sample does not establish resolution or safe automation. See artifacts/ratings/PROVENANCE.md for review assistance.
-
-```json
-{
-  "outputs": 60,
-  "ordinal_weighted_kappa": {
-    "groundedness": 0.3108728943338439,
-    "relevance": 0.44457978075517657,
-    "helpfulness": 0.32578740157480324,
-    "tone": 0.3211920529801324
-  },
-  "binary_kappa": {
-    "privacy_violation": null,
-    "unsupported_action_claim": null,
-    "unsafe_instruction": null,
-    "critical_hallucination": -0.027397260273971366
-  },
-  "raw_agreement": {
-    "groundedness": 0.8333333333333334,
-    "relevance": 0.35,
-    "helpfulness": 0.11666666666666667,
-    "tone": 0.55,
-    "privacy_violation": 1.0,
-    "unsupported_action_claim": 1.0,
-    "unsafe_instruction": 1.0,
-    "critical_hallucination": 0.9166666666666666
-  },
-  "mean_absolute_error": {
-    "groundedness": 0.36666666666666664,
-    "relevance": 0.8333333333333334,
-    "helpfulness": 1.3166666666666667,
-    "tone": 0.5166666666666667
-  },
-  "notes": "Null kappa means undefined (constant ratings), not perfect agreement. Outputs from the same customer are correlated.",
-  "by_system": {
-    "b0": {
-      "human": {
-        "outputs": 20,
-        "mean_scores": {
-          "groundedness": 5.0,
-          "relevance": 3.0,
-          "helpfulness": 3.8,
-          "tone": 4.0
-        },
-        "flag_counts": {
-          "privacy_violation": 0,
-          "unsupported_action_claim": 0,
-          "unsafe_instruction": 0,
-          "critical_hallucination": 0
-        },
-        "quality_pass_rate": 0.0
-      },
-      "judge": {
-        "outputs": 20,
-        "mean_scores": {
-          "groundedness": 5.0,
-          "relevance": 2.85,
-          "helpfulness": 2.4,
-          "tone": 4.0
-        },
-        "flag_counts": {
-          "privacy_violation": 0,
-          "unsupported_action_claim": 0,
-          "unsafe_instruction": 0,
-          "critical_hallucination": 0
-        },
-        "quality_pass_rate": 0.0
-      }
-    },
-    "b1": {
-      "human": {
-        "outputs": 20,
-        "mean_scores": {
-          "groundedness": 4.6,
-          "relevance": 3.75,
-          "helpfulness": 3.9,
-          "tone": 3.9
-        },
-        "flag_counts": {
-          "privacy_violation": 0,
-          "unsupported_action_claim": 0,
-          "unsafe_instruction": 0,
-          "critical_hallucination": 1
-        },
-        "quality_pass_rate": 0.65
-      },
-      "judge": {
-        "outputs": 20,
-        "mean_scores": {
-          "groundedness": 4.0,
-          "relevance": 3.25,
-          "helpfulness": 2.95,
-          "tone": 3.95
-        },
-        "flag_counts": {
-          "privacy_violation": 0,
-          "unsupported_action_claim": 0,
-          "unsafe_instruction": 0,
-          "critical_hallucination": 3
-        },
-        "quality_pass_rate": 0.45
-      }
-    },
-    "b2": {
-      "human": {
-        "outputs": 20,
-        "mean_scores": {
-          "groundedness": 5.0,
-          "relevance": 4.0,
-          "helpfulness": 4.0,
-          "tone": 5.0
-        },
-        "flag_counts": {
-          "privacy_violation": 0,
-          "unsupported_action_claim": 0,
-          "unsafe_instruction": 0,
-          "critical_hallucination": 0
-        },
-        "quality_pass_rate": 1.0
-      },
-      "judge": {
-        "outputs": 20,
-        "mean_scores": {
-          "groundedness": 4.7,
-          "relevance": 2.95,
-          "helpfulness": 2.7,
-          "tone": 4.1
-        },
-        "flag_counts": {
-          "privacy_violation": 0,
-          "unsupported_action_claim": 0,
-          "unsafe_instruction": 0,
-          "critical_hallucination": 1
-        },
-        "quality_pass_rate": 0.15
-      }
-    }
-  }
-}
-```
+PENDING: configured LLM-judge run and judge–human agreement. Human scores above, when supplied, are measured separately. This report is not submission-complete.
 
 ## What is misleading about my headline number?
 

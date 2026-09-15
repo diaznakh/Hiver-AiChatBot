@@ -8,11 +8,13 @@ from pathlib import Path
 
 from .contracts import IntentPrediction
 
-TOKEN = re.compile(r"[a-z0-9']+")
+TOKEN = re.compile(r"[\w']+", re.UNICODE)
 
 
 def tokenize(text: str) -> list[str]:
-    return TOKEN.findall(text.lower())
+    words = TOKEN.findall(text.lower())
+    bigrams = [f"{words[i]}_{words[i+1]}" for i in range(len(words)-1)]
+    return words + bigrams
 
 
 class KeywordIntentClassifier:

@@ -12,8 +12,8 @@
   "mode": "offline_demo",
   "policy": {
     "auto_delivery_enabled": false,
-    "tau_evidence": null,
-    "tau_intent": null,
-    "threshold_status": "NO_USEFUL_AUTO_THRESHOLD_FOUND"
+    "tau_evidence": 8.0,
+    "tau_intent": 0.95,
+    "threshold_status": "CALIBRATED_ON_HUMAN_REVIEWED_DEVELOPMENT_SET"
   }
 }

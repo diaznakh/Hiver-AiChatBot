@@ -13,8 +13,8 @@ from evals.metrics import macro_f1
 
 
 class PendingFixTests(unittest.TestCase):
-    def case(self, text):
-        return EvidenceCase('one', 'AmazonHelp', 'video app issue', text, ('1','2'), '2017', 'actionable_guidance', 'digital_service')
+    def case(self, text, *, intent='digital_service'):
+        return EvidenceCase('one', 'AmazonHelp', 'video app issue', text, ('1','2'), '2017', 'actionable_guidance', intent)
 
     def test_reply_changes_with_evidence(self):
         gateway = DeterministicDraftGateway()
@@ -83,3 +83,34 @@ class PendingFixTests(unittest.TestCase):
             result = json.loads(output.read_text())
             self.assertEqual(result['ordinal_weighted_kappa']['tone'], 1)
             self.assertEqual(result['by_system']['b2']['human']['quality_pass_rate'], .5)
+
+    # --- Fixed limitations (previously xfail or acknowledged issues) ---
+
+    def test_tokenizer_handles_unicode(self):
+        """Fixed: tokenizer now handles non-Latin scripts (was ASCII-only)."""
+        from support_agent.classifier import tokenize
+        tokens = tokenize("こんにちは")
+        self.assertTrue(len(tokens) > 0, "Unicode text should produce tokens")
+
+    def test_grounding_expanded_allowlist(self):
+        """Fixed: grounding allowlist now covers more safe patterns."""
+        from support_agent.grounding import supported_guidance
+        # Order status check should now produce guidance
+        result = supported_guidance("Where is my order?", "I'm sorry for the delay, please check...")
+        self.assertTrue(len(result) > 0, "Order status queries should produce guidance")
+        # Account reset should produce guidance
+        result = supported_guidance("I can't access my account", "Reset your password here...")
+        self.assertTrue(len(result) > 0, "Account access queries should produce guidance")
+
+    def test_guardrail_two_tier_split(self):
+        """Fixed: descriptive terms no longer force precheck escalation."""
+        from support_agent.guardrails import GuardrailEngine
+        engine = GuardrailEngine(intent_threshold=0.5, evidence_threshold=1.0)
+        # Hard action: refund request → must still escalate at precheck
+        result = engine.precheck("I want a refund for my order")
+        self.assertFalse(result.passed)
+        self.assertIn("ACCOUNT_ACTION_REQUIRED", result.reason_codes)
+        # Soft description: damaged item → should pass precheck
+        result = engine.precheck("My item arrived damaged")
+        self.assertTrue(result.passed, "Descriptive terms should not trigger precheck escalation")
+

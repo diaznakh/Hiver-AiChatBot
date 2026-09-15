@@ -5,6 +5,7 @@ import json
 import os
 import random
 import hashlib
+import http.client
 import time
 import urllib.error
 import urllib.request
@@ -38,8 +39,9 @@ def call_judge(prompt: str) -> dict:
         method="POST",
     )
     for attempt in range(4):
+        print(f'Contacting judge (attempt {attempt + 1}/4; socket timeout 120s)...', flush=True)
         try:
-            with urllib.request.urlopen(request, timeout=60) as response:
+            with urllib.request.urlopen(request, timeout=120) as response:
                 payload = json.loads(response.read())
             break
         except urllib.error.HTTPError as exc:
@@ -50,6 +52,14 @@ def call_judge(prompt: str) -> dict:
                 time.sleep(delay)
                 continue
             raise RuntimeError(f'Judge HTTP {exc.code}: {detail}\nSaved ratings are preserved. For quota errors, wait for quota reset; no billing upgrade is required.') from None
+        except (TimeoutError, ConnectionError, urllib.error.URLError, http.client.IncompleteRead, http.client.RemoteDisconnected) as exc:
+            # HTTPError is handled above; this branch covers connection/read failures.
+            if attempt < 3:
+                delay = 10 * (attempt + 1)
+                print(f'Judge connection/read failed ({type(exc).__name__}); retrying in {delay}s.', flush=True)
+                time.sleep(delay)
+                continue
+            raise RuntimeError('Judge connection/read failed after 4 attempts. Saved ratings are preserved. Rerun with the same model to resume.') from None
     return json.loads(payload["choices"][0]["message"]["content"])
 
 
@@ -100,6 +110,7 @@ def main() -> None:
                 raise ValueError('Saved prompt fingerprint missing or changed; preserve file and use a new output path.')
             validate_rating(saved[identifier]['rating'], {case['case_id'] for case in evidence})
     with output.open("a" if args.resume else "x") as handle:
+        print(f'Resuming with {len(saved)}/{len(rows)} saved ratings.', flush=True)
         for row in rows:
             identifier = blinded_output_id(row['output_id'], args.seed)
             if identifier in saved:
@@ -111,6 +122,7 @@ def main() -> None:
                 except KeyError:
                     pass
             prompt = build_prompt(examples[row["example_id"]], row["prediction"], evidence)
+            print(f'Rating {len(saved) + 1}/{len(rows)}...', flush=True)
             rating = call_judge(prompt)
             allowed_ids = {case["case_id"] for case in evidence}
             validate_rating(rating, allowed_ids)

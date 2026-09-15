@@ -54,3 +54,37 @@ class JudgeTransportTests(unittest.TestCase):
         with patch('urllib.request.urlopen', side_effect=[error, response]), patch('time.sleep') as sleep, patch('builtins.print'):
             self.assertEqual(call_judge('case'), RATING)
             sleep.assert_called_once_with(20)
+
+    @patch.dict(os.environ, ENV)
+    def test_timeout_then_success(self):
+        response = io.BytesIO(json.dumps({'choices': [{'message': {'content': json.dumps(RATING)}}]}).encode())
+        with patch('urllib.request.urlopen', side_effect=[TimeoutError(), response]) as request, patch('time.sleep') as sleep, patch('builtins.print'):
+            self.assertEqual(call_judge('case'), RATING)
+            self.assertEqual(request.call_count, 2)
+            sleep.assert_called_once_with(10)
+
+    @patch.dict(os.environ, ENV)
+    def test_timeouts_stop_after_four_attempts(self):
+        with patch('urllib.request.urlopen', side_effect=TimeoutError()) as request, patch('time.sleep'), patch('builtins.print'):
+            with self.assertRaisesRegex(RuntimeError, 'after 4 attempts'):
+                call_judge('case')
+            self.assertEqual(request.call_count, 4)
+
+    @patch.dict(os.environ, ENV)
+    def test_interrupted_run_resumes_without_losing_first_rating(self):
+        with tempfile.TemporaryDirectory() as folder:
+            output = Path(folder) / 'judge.jsonl'
+            argv = ['judge', '--examples', 'data/golden_set.xlsx', '--predictions',
+                    *[f'artifacts/official/predictions_{s}.jsonl' for s in ('b0','b1','b2')],
+                    '--output', str(output), '--resume']
+            with patch('sys.argv', argv), patch('builtins.print'):
+                with patch('evals.run_judge.call_judge', side_effect=[RATING, RuntimeError('timeout')]):
+                    with self.assertRaisesRegex(RuntimeError, 'timeout'):
+                        main()
+                first = output.read_bytes()
+                self.assertEqual(len(first.splitlines()), 1)
+                with patch('evals.run_judge.call_judge', return_value=RATING) as judge:
+                    main()
+                    self.assertEqual(judge.call_count, 59)
+                self.assertTrue(output.read_bytes().startswith(first))
+                self.assertEqual(len(output.read_bytes().splitlines()), 60)

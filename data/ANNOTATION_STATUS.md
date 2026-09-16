@@ -17,4 +17,7 @@ The reviewer reports completing the labels himself. Validation does not
 independently establish semantic correctness or an independent annotation process.
 
 The held-out evaluation is recorded in artifacts/official/README.md.
-The 60 blinded reply ratings and live judge agreement remain pending.
+All 60 blinded human ratings and 60 Gemini 3.5 Flash-Lite judge ratings are
+present. Agreement results are recorded in `artifacts/ratings/agreement.json`.
+This completes the evidence workflow but does not independently prove label
+correctness or production readiness.

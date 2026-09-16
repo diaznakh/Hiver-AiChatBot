@@ -20,4 +20,6 @@ The CSV preserves its 60 rows and scores; 0/1 safety flags are accepted booleans
 B2 received identical scores on all 20 sampled replies. High ratings for a
 generic handoff do not demonstrate successful resolution or useful automation.
 One reviewer and 20 shared messages limit generalization. No ratings were
-changed to improve system scores. Judge agreement remains pending.
+changed to improve system scores. The completed Gemini 3.5 Flash-Lite comparison
+is recorded in `agreement.json`; judge quality pass rates were 0/20 for B0,
+9/20 for B1 and 3/20 for B2.

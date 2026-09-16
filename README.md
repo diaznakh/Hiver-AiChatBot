@@ -80,7 +80,7 @@ Machine-generated labels are not presented as human ground truth. Official evalu
 
 The revised workbook is imported and its 50 development rows passed validation.
 See [annotation status](data/ANNOTATION_STATUS.md) and the measured
-[development review](artifacts/development/REVIEW.md). B2 has successfully been calibrated with optimal thresholds (`tau_intent = 0.95`, `tau_evidence = 8.0`) that provide safe automatic handling. All 150 test rows are complete. The held-out test run is recorded in
+[development review](artifacts/development/REVIEW.md). Calibration selected `tau_intent = 0.95` and `tau_evidence = 8.0`; only 1/50 development examples was automatically handled with no observed unsafe event, which is too small to establish safety. Held-out testing later found all 6 B2 automatic decisions unsafe under the route labels. All 150 test rows are complete. The held-out test run is recorded in
 [official results](artifacts/official/README.md) and [REPORT_RESULTS.md](artifacts/official/REPORT_RESULTS.md).
 
 To reproduce the development evaluation, run:
@@ -161,7 +161,7 @@ Agreement is reported with weighted kappa for groundedness, relevance, helpfulne
 
 ## Current status
 
-The project is fully complete and ready for submission. The B2 agent is highly conservative, achieving 95.95% escalation recall on the unseen test set and avoiding the 0% auto-handle trap. However, autonomous handling has not yet been demonstrated as safe.
+The project is fully complete and ready for submission. B2 achieved 95.95% escalation recall and 4.0% automatic coverage on the held-out test set, but all 6 automatic decisions were unsafe under the route labels. Autonomous handling has therefore not been demonstrated as safe and should remain disabled.
 
 All 200 labels pass validation, and the 150-row held-out evaluation has been successfully executed. See [official results](artifacts/official/REPORT_RESULTS.md) for full metrics.
 

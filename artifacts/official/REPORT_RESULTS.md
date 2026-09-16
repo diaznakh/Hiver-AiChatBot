@@ -12,7 +12,8 @@
 
 Routing/intent failures use the full test split; reply-only failures use the human-rated subset. Counts are not directly comparable across these denominators. Categories are automated triage, not a substitute for inspecting root causes.
 
-Only 3 categories observed by this harness. Inspect examples for finer root causes; do not invent five modes.
+This automated triage observed three broad categories. REPORT.md separates five
+concrete failure modes through manual inspection of representative cases.
 ### 1. Intent misclassification (68 observed) - amazon_test_004
 
 Customer: [HANDLE] are very happy to take my £8 a month for Prime but now it’s almost December their “one day delivery” takes 3 days!! What’s the point #cancelprime [URL]
@@ -57,7 +58,20 @@ Hypothesis: The safety gate was too conservative or the retrieved evidence was t
 
 ## Reply quality and judge-human agreement
 
-PENDING: configured LLM-judge run and judge–human agreement. Human scores above, when supplied, are measured separately. This report is not submission-complete.
+All 60 human ratings and 60 Gemini 3.5 Flash-Lite judge ratings are complete.
+
+| System | Human quality pass | Judge quality pass |
+| --- | ---: | ---: |
+| B0 | 0/20 | 0/20 |
+| B1 | 13/20 | 9/20 |
+| B2 | 20/20 | 3/20 |
+
+Weighted kappa was 0.311 for groundedness, 0.445 for relevance, 0.326 for
+helpfulness and 0.321 for tone. Raw agreement was 83.3%, 35.0%, 11.7% and 55.0%
+respectively. Privacy, unsupported-action and unsafe-instruction flags were
+constant for both raters, so their binary kappa is undefined rather than perfect.
+Critical-hallucination kappa was -0.027. See `../ratings/agreement.json` and
+`../ratings/PROVENANCE.md` for complete results and review provenance.
 
 ## What is misleading about my headline number?
 

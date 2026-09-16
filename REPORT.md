@@ -87,12 +87,32 @@ The completed sample contains 60 replies (20 messages × three systems). Scores 
 | System | Groundedness | Relevance | Helpfulness | Tone | Quality pass (Human) | Quality pass (LLM Judge) |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | B0 | 5.00 | 3.00 | 3.80 | 4.00 | 0/20 | 0/20 |
-| B1 | 4.60 | 3.75 | 3.90 | 3.90 | 13/20 | 7/20 |
-| B2 | 5.00 | 4.00 | 4.00 | 5.00 | 20/20 | 4/20 |
+| B1 | 4.60 | 3.75 | 3.90 | 3.90 | 13/20 | 9/20 |
+| B2 | 5.00 | 4.00 | 4.00 | 5.00 | 20/20 | 3/20 |
 
-Human ratings were highly positive, but the LLM judge (Gemini 3.5 Flash-Lite) was substantially harsher, passing only 20% (4/20) of B2 replies. This discrepancy is valuable evidence that a single positive quality number should not be treated as proof of production readiness.
+Human ratings were highly positive, but the LLM judge (Gemini 3.5 Flash-Lite) was substantially harsher, passing only 15% (3/20) of B2 replies. Weighted kappa was 0.311 for groundedness, 0.445 for relevance, 0.326 for helpfulness and 0.321 for tone. This discrepancy is valuable evidence that a single positive quality number should not be treated as proof of production readiness. Null binary kappa for three safety flags means both raters used a constant value, not perfect agreement.
 
-## 5. End-to-End Pipeline Examples
+## 5. Failure analysis and end-to-end examples
+
+Five observed failure modes are kept distinct even when one message exhibits
+more than one problem:
+
+1. **Mixed shipping and billing language:** `amazon_test_004` was classified as
+   `payment_charge` instead of `delivery_tracking` because expedited-delivery
+   complaints mention both Prime fees and lateness.
+2. **Unsafe automatic routing:** `amazon_test_024` was automatically handled even
+   though its delivery complaint was labelled for escalation. All six B2 automatic
+   decisions were unsafe under the held-out route labels.
+3. **Social or joking messages over-escalate:** `amazon_test_003` was interpreted
+   as an order-change request rather than a light acknowledgement case.
+4. **Non-Latin language coverage:** `amazon_test_017` contains Japanese text that
+   the ASCII-oriented word model cannot represent reliably.
+5. **Intent filtering compounds an upstream error:** `amazon_test_134` mentions a
+   return button while asking about delivery, so the wrong intent restricts BM25
+   retrieval to the wrong evidence pool.
+
+The examples below show how those component failures propagate through the full
+pipeline.
 
 To demonstrate how the BM25 retrieval grounds the response generation, here are two tangible examples from the evaluation set.
 
@@ -117,3 +137,12 @@ To demonstrate how the BM25 retrieval grounds the response generation, here are 
 ## 6. What is misleading about my headline number?
 
 53.33% intent accuracy does not mean the complete agent is 53.33% reliable. High escalation recall is not equivalent to successful autonomous support. The agent automatically handled only 4.0% of test cases, and all 6/6 of those automatic cases were unsafe under the evaluation labels. Furthermore, reply quality has significantly different results depending on whether humans or the LLM judge evaluate it. Therefore, the headline metric alone is insufficient to claim production readiness.
+
+## 7. What I would do with one more week
+
+I would first review the unsafe automatic cases and keep automatic delivery
+disabled until a fresh development set supports safer thresholds. I would then
+audit weak intent labels, add Unicode-aware features, compare BM25 with hybrid
+retrieval on documented misses, add owner-approved current policy, and expand
+blind human evaluation. Any test-informed model revision would be evaluated on
+a new untouched holdout rather than reusing this test set.

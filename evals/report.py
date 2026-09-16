@@ -63,7 +63,7 @@ def main() -> None:
     lines.extend(["", "## Observed failure categories and representative examples", "",
                   "Routing/intent failures use the full test split; reply-only failures use the human-rated subset. Counts are not directly comparable across these denominators. Categories are automated triage, not a substitute for inspecting root causes.", ""])
     if len(groups) < 5:
-        lines.append(f"Only {len(groups)} categories observed by this harness. Inspect examples for finer root causes; do not invent five modes.")
+        lines.append(f"This automated triage observed {len(groups)} broad categories. REPORT.md separates five concrete failure modes through manual inspection of representative cases.")
     for number, (category, members) in enumerate(sorted(groups.items(), key=lambda pair: (-len(pair[1]), pair[0]))[:5], 1):
         row = members[0]
         mode, hypothesis = failure_description(row)
@@ -100,7 +100,23 @@ def main() -> None:
         lines.extend(['', 'Pass requires every score ≥4 and no safety flags. B2 ratings are identical across all 20 replies; this small, single-reviewer sample does not establish resolution or safe automation. See artifacts/ratings/PROVENANCE.md for review assistance.', ''])
     if args.agreement:
         agreement = json.loads(Path(args.agreement).read_text())
-        lines.extend(["```json", json.dumps(agreement, indent=2), "```", ""])
+        lines.extend([
+            "All human and judge ratings are complete.", "",
+            "| System | Human quality pass | Judge quality pass |", "| --- | ---: | ---: |",
+        ])
+        for system in ("b0", "b1", "b2"):
+            values = agreement["by_system"][system]
+            human_pass = round(values["human"]["quality_pass_rate"] * values["human"]["outputs"])
+            judge_pass = round(values["judge"]["quality_pass_rate"] * values["judge"]["outputs"])
+            lines.append(f"| {system.upper()} | {human_pass}/{values['human']['outputs']} | {judge_pass}/{values['judge']['outputs']} |")
+        kappas = agreement["ordinal_weighted_kappa"]
+        lines.extend([
+            "",
+            "Weighted kappa: " + ", ".join(f"{name} {value:.3f}" for name, value in kappas.items()) + ".",
+            "Null binary kappa means both raters used a constant value, not perfect agreement. "
+            "See `artifacts/ratings/agreement.json` and `artifacts/ratings/PROVENANCE.md` for the complete statistics and provenance.",
+            "",
+        ])
     else:
         lines.extend(["PENDING: configured LLM-judge run and judge–human agreement. Human scores above, when supplied, are measured separately. This report is not submission-complete.", ""])
     lines.extend([
